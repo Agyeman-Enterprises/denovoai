@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node16",
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@schemas/*": ["packages/schemas/*"],
+      "@services/*": ["services/*"],
+      "@apps/*": ["apps/*"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.js", "./**/*.json"],
+  "exclude": ["node_modules", "runs", "dist"]
+}

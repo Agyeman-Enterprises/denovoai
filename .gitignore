@@ -1,0 +1,10 @@
+node_modules
+pnpm-lock.yaml
+npm-lock.json
+yarn.lock
+runs/
+.DS_Store
+dist/
+out/
+.env
+.env.local

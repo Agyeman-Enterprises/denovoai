@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Maps mode + optional feature flags to required module sets.",
+  "platform_core": [
+    "auth",
+    "organizations",
+    "permissions_rbac",
+    "audit_log",
+    "settings",
+    "telemetry"
+  ],
+  "modes": {
+    "community": {
+      "core": [
+        "profiles",
+        "posts",
+        "comments",
+        "moderation",
+        "notifications",
+        "search",
+        "analytics"
+      ]
+    },
+    "marketplace": {
+      "core": [
+        "profiles",
+        "listings",
+        "orders",
+        "payments",
+        "reviews",
+        "disputes",
+        "notifications",
+        "search_faceted",
+        "analytics"
+      ]
+    },
+    "booking": {
+      "core": [
+        "profiles",
+        "availability",
+        "calendar",
+        "booking_flow",
+        "reminders",
+        "notifications",
+        "search",
+        "analytics"
+      ]
+    },
+    "saas_dashboard": {
+      "core": [
+        "profiles",
+        "orgs_admin",
+        "entities_crud",
+        "filters_search",
+        "analytics",
+        "notifications"
+      ]
+    }
+  },
+  "feature_rules": {
+    "payments": ["payments", "billing", "invoices"],
+    "uploads": ["media_upload"],
+    "messaging": ["direct_messages", "presence"],
+    "ai": ["ai_agent_workflows", "vector_search"],
+    "marketplace": ["listings", "orders", "payments", "reviews"],
+    "private_groups": ["private_groups"]
+  }
+}

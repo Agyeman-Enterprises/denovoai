@@ -1,0 +1,28 @@
+{
+  "name": "denovo-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.5.0",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*",
+    "templates/*"
+  ],
+  "scripts": {
+    "demo": "node services/orchestrator/run.js",
+    "resolve": "node services/module-engine/resolve.js --example",
+    "lint": "echo \"add eslint later\"",
+    "test": "node services/orchestrator/run.js --prompt \"self test\""
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  }
+}
