@@ -1,15 +1,20 @@
-import "./globals.css";
-import type { ReactNode } from "react";
+﻿import './globals.css'
+import type { Metadata } from 'next'
 
-export const metadata = {
-  title: "DeNovo Studio",
-  description: "Control panel for AI-built apps"
-};
+export const metadata: Metadata = {
+  title: 'DeNovo AI Platform',
+  description: 'AI-powered development platform',
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
       <body>{children}</body>
     </html>
-  );
+  )
 }
+

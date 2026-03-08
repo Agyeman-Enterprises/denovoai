@@ -10,12 +10,18 @@ let ajv = null;
 try {
   const Ajv = (await import("ajv")).default;
   ajv = new Ajv({ allErrors: true, strict: false });
+  // Remove $schema from loaded schemas to avoid meta-schema loading issues
 } catch {
   // ajv not installed; fallback will be used.
 }
 
 function loadSchema(schemaPath) {
-  return JSON.parse(fs.readFileSync(schemaPath, "utf8"));
+  const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
+  // Remove $schema to avoid needing the meta-schema
+  if (schema.$schema) {
+    delete schema.$schema;
+  }
+  return schema;
 }
 
 export function validateOrWarn(schemaPath, data) {

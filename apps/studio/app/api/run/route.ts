@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const repoRoot = path.resolve(process.cwd(), "..", "..");
   const script = path.join(repoRoot, "services", "orchestrator", "run.js");
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     execFile("node", [script, "--prompt", prompt], { cwd: repoRoot }, (err, stdout, stderr) => {
       if (err) {
         resolve(
