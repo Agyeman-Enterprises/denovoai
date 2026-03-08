@@ -1,0 +1,9 @@
+{
+  "/_not-found": "app/_not-found.js",
+  "/api/runs/[runId]/[artifact]/route": "app/api/runs/[runId]/[artifact]/route.js",
+  "/api/run/route": "app/api/run/route.js",
+  "/page": "app/page.js",
+  "/runs/[id]/page": "app/runs/[id]/page.js",
+  "/build/[runId]/page": "app/build/[runId]/page.js",
+  "/api/runs/route": "app/api/runs/route.js"
+}

@@ -1,8 +1,10 @@
 ﻿import './globals.css'
-import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 
-export const metadata: Metadata = {
-  title: 'DeNovo AI Platform',
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata = {
+  title: 'Denovo AI Platform',
   description: 'AI-powered development platform',
 }
 
@@ -13,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
