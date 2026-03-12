@@ -1,16 +1,16 @@
 export const APP_CONTRACT = {
   baseURL: process.env.E2E_URL ?? 'http://localhost:3004',
-  hasAuth: false,
-  hasBilling: false,
-  hasRoles: false,
+  hasAuth: true,
+  hasBilling: true,
+  hasRoles: true,
 
   routes: {
     root: '/',
-    runs: '/runs',
-    build: '/build',
-    login: null as string | null,
+    login: '/login',
+    billing: '/billing',
     dashboard: '/',
-    checkout: null as string | null,
+    checkout: '/billing',
+    runs: '/runs',
   },
 
   testIds: {
@@ -26,9 +26,15 @@ export const APP_CONTRACT = {
     emptyState: 'empty-state',
     formError: 'form-error',
     successToast: 'success-toast',
-    // Not applicable in this app
-    navUserMenu: null as string | null,
-    logout: null as string | null,
-    checkout: null as string | null,
+    navUserMenu: 'nav-user-menu',
+    logout: 'logout',
+    loginLink: 'login-link',
+    emailInput: 'email-input',
+    passwordInput: 'password-input',
+    passwordToggle: 'password-toggle',
+    submitAuth: 'submit-auth',
+    checkout: 'checkout',
+    currentPlan: 'current-plan',
+    limitWarning: 'limit-warning',
   },
 }
