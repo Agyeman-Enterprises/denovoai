@@ -22,17 +22,9 @@ export async function deployToVercel(workspaceDir, productSpec) {
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
     }
 
-    // Write .vercel/project.json to avoid interactive prompts
-    const vercelDir = path.join(workspaceDir, '.vercel')
-    fs.mkdirSync(vercelDir, { recursive: true })
-    fs.writeFileSync(path.join(vercelDir, 'project.json'), JSON.stringify({
-      projectId: null,
-      orgId: null,
-    }))
-
     console.log('[deployer] Running vercel --prod...')
     const stdout = execSync(
-      `vercel --token ${token} --prod --yes --no-clipboard`,
+      `vercel --token ${token} --prod --yes`,
       { cwd: workspaceDir, stdio: 'pipe', timeout: 180000 }
     ).toString()
 

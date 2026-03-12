@@ -4,7 +4,6 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <title>Denovo AI Platform</title>
         <meta name="description" content="Denovo AI Platform" />
       </Head>
       <body>

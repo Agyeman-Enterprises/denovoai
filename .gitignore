@@ -16,3 +16,8 @@ e2e-out.txt
 server-out.txt
 test-out.txt
 run-e2e.bat
+  
+*.log  
+*.py  
+*.txt  
+server.err 

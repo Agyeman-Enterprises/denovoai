@@ -162,9 +162,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>DeNovo — AI App Factory</title>
+        <meta name="description" content="Denovo AI - Build any app instantly" />
       </Head>
-      <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <div data-testid="app-root" style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
         <header style={{
           background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 32px',
           height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -200,19 +200,39 @@ export default function Home() {
         </header>
 
         <main style={{ maxWidth: 860, margin: '0 auto', padding: '40px 24px' }}>
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', margin: '0 0 8px', lineHeight: 1.2 }}>
-              Describe your app.{' '}
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <h1 data-testid="hero-heading" style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', margin: '0 0 8px', lineHeight: 1.2 }}>
+              Denovo AI {'—'}{' '}
               <span style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                We build it.
+                Build any app instantly.
               </span>
             </h1>
+            <p style={{ color: '#64748b', fontSize: 16, margin: 0 }}>
+              Describe your idea. We generate a landing page + app + Stripe billing, deployed to Vercel in minutes.
+            </p>
+          </div>
+
+          <div data-testid="feature-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+            {[
+              { title: 'AI Development', desc: 'Prompt-driven app generation' },
+              { title: 'Smart Templates', desc: 'Pre-built patterns for any use case' },
+              { title: 'Orchestration', desc: 'Multi-step pipelines, auto-wired' },
+              { title: 'Module Engine', desc: 'Composable feature modules' },
+            ].map(({ title, desc }) => (
+              <div key={title} style={{ background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 12, padding: '16px 14px' }}>
+                <h2 style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>{title}</h2>
+                <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginBottom: 32, display: 'none' }}>
             <p style={{ color: '#64748b', fontSize: 16, margin: 0 }}>
               Landing page + app + Stripe billing — deployed to Vercel in minutes.
             </p>
           </div>
 
-          <form onSubmit={handleCreate} style={{ marginBottom: 40 }}>
+          <form data-testid="create-run-form" onSubmit={handleCreate} style={{ marginBottom: 40 }}>
             <div style={{
               background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16,
               padding: 4, boxShadow: '0 4px 24px rgba(99,102,241,0.08)',
@@ -223,9 +243,9 @@ export default function Home() {
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleCreate(e as any) } }}
-                placeholder="e.g. Build a dog walking marketplace where owners book walkers, pay via Stripe, and leave reviews..."
+                placeholder="Describe your app idea..."
                 rows={3}
-                aria-label="Describe your app"
+                aria-label="Run prompt"
                 style={{
                   width: '100%', border: 'none', outline: 'none', resize: 'none',
                   padding: '14px 16px', fontSize: 15, color: '#0f172a',
