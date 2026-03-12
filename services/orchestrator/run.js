@@ -45,10 +45,14 @@ export function updateStatus(runDir, patch) {
  * - Strips markdown code fences if the LLM accidentally included them
  */
 function sanitizeGeneratedFile(content) {
-  // Fix named import of default-exported Sidebar: { Sidebar } → default import
+  // Fix named imports of default-exported components (Sidebar, Footer)
   let fixed = content.replace(
     /import\s*\{\s*Sidebar\s*\}\s*from\s*(['"])(@\/components\/app\/sidebar)\1/g,
     "import Sidebar from '$2'"
+  )
+  fixed = fixed.replace(
+    /import\s*\{\s*Footer\s*\}\s*from\s*(['"])(@\/components\/app\/footer)\1/g,
+    "import Footer from '$2'"
   )
 
   // Replace single-quoted strings containing apostrophes with double-quoted strings

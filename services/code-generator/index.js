@@ -79,7 +79,8 @@ ${spec.landingHero.features.map(f => `   - ${f.title}: ${f.description}`).join('
    Pro plan: ${JSON.stringify(spec.pricingPlans[1])}
 5. TESTIMONIALS: 3 fake but realistic testimonials with avatar initials
 6. CTA SECTION: Bottom CTA with gradient background
-7. FOOTER: Simple footer with links
+7. FOOTER: Import and render the Footer component: import Footer from '@/components/app/footer'
+   Place <Footer /> at the very bottom of the page, after all sections.
 
 Use inline styles for the brand gradient: background: 'linear-gradient(135deg, ${spec.primaryColor}dd 0%, ${spec.accentColor}bb 100%)'
 
@@ -208,6 +209,39 @@ On completion, redirect to /dashboard.`
   return generateScreen('onboarding', prompt, spec)
 }
 
+async function generateFooter(spec) {
+  const prompt = `${designContext(spec)}
+
+Generate a production-quality Footer component for "${spec.displayName}".
+File path: components/app/footer.tsx
+
+This footer is used on the public-facing landing page. Make it look like Stripe/Linear quality.
+
+Requirements:
+1. BRAND COLUMN (left): App logo (colored square + name), tagline "${spec.tagline}", brief description (1 sentence).
+   Add social icon links (Twitter/X, LinkedIn, GitHub) as icon-only buttons.
+2. PRODUCT COLUMN: Links relevant to this specific app:
+   - Features, Pricing, Changelog, Roadmap
+3. COMPANY COLUMN: About, Blog, Careers, Press
+4. LEGAL COLUMN: Privacy Policy, Terms of Service, Cookie Policy, Security
+5. BOTTOM BAR: Copyright "© ${new Date().getFullYear()} ${spec.displayName}. All rights reserved." + "Made with ♥" tagline
+   Use a subtle top border to separate from the columns.
+
+Design rules:
+- Background: dark (#0f172a or similar near-black)
+- Text: slate-400 for links, white for headings and brand name
+- Brand color var(--primary) for logo background and hover states on links
+- Column headings: uppercase, tracking-wider, text-xs, text-slate-500
+- Links: text-slate-400 hover:text-white transition-colors text-sm
+- 4-column grid on desktop, 2-column on tablet, 1-column on mobile
+- Full width, generous padding (py-16 px-8)
+
+Export as: export default function Footer()
+This is a React client component ('use client').`
+
+  return generateScreen('footer', prompt, spec)
+}
+
 async function generateSidebar(spec) {
   const prompt = `${designContext(spec)}
 
@@ -245,7 +279,7 @@ export async function generateAllScreens(workspaceDir, productSpec) {
   fs.mkdirSync(componentsDir, { recursive: true })
 
   // Generate all screens in parallel
-  const [landing, dashboard, list, settings, billing, onboarding, sidebar] = await Promise.all([
+  const [landing, dashboard, list, settings, billing, onboarding, sidebar, footer] = await Promise.all([
     generateLandingPage(productSpec),
     generateDashboard(productSpec),
     generateListPage(productSpec),
@@ -253,6 +287,7 @@ export async function generateAllScreens(workspaceDir, productSpec) {
     generateBillingPage(productSpec),
     generateOnboardingPage(productSpec),
     generateSidebar(productSpec),
+    generateFooter(productSpec),
   ])
 
   // Write all files
@@ -263,10 +298,11 @@ export async function generateAllScreens(workspaceDir, productSpec) {
   fs.writeFileSync(path.join(appDir, '(app)', 'billing', 'page.tsx'), billing)
   fs.writeFileSync(path.join(appDir, '(app)', 'onboarding', 'page.tsx'), onboarding)
   fs.writeFileSync(path.join(componentsDir, 'sidebar.tsx'), sidebar)
+  fs.writeFileSync(path.join(componentsDir, 'footer.tsx'), footer)
 
-  console.log('[codegen] All 7 screens generated ✓')
+  console.log('[codegen] All 8 screens generated ✓')
 
   return {
-    screens: ['landing', 'dashboard', 'list', 'settings', 'billing', 'onboarding', 'sidebar'],
+    screens: ['landing', 'dashboard', 'list', 'settings', 'billing', 'onboarding', 'sidebar', 'footer'],
   }
 }
