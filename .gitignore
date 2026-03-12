@@ -8,3 +8,11 @@ dist/
 out/
 .env
 .env.local
+.next/
+test-results/
+playwright-report/
+check-*.cjs
+e2e-out.txt
+server-out.txt
+test-out.txt
+run-e2e.bat

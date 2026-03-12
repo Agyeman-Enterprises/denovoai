@@ -1,6 +1,5 @@
-﻿@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind directives removed — postcss/tailwind not configured in this workspace.
+   Utility classes in JSX are preserved for future setup. */
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -25,4 +24,3 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-
