@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 import fs from 'node:fs'
 
@@ -57,32 +57,48 @@ export async function deployToVercel(workspaceDir, productSpec) {
     }
 
     // Step 1: Link the project (creates .vercel/project.json)
-    console.log('[deployer] Linking project...')
-    execSync(
-      ['vercel', 'link', '--token', token, '--yes', ...scopeFlag].join(' '),
-      { cwd: workspaceDir, stdio: 'pipe', timeout: 60000 }
-    )
+    // Sanitize slug to alphanumeric + hyphens only — never interpolate raw user input into shell
+    const rawSlug = typeof productSpec?.slug === 'string' ? productSpec.slug : ''
+    const projectName = rawSlug.replace(/[^a-z0-9-]/gi, '-').slice(0, 52) || `denovo-${Date.now()}`
+    console.log(`[deployer] Linking project as: ${projectName}`)
+    // Use spawnSync array form — no shell interpolation
+    const linkArgs = ['link', '--token', token, '--yes', '--name', projectName, ...scopeFlag]
+    const linkResult = spawnSync('vercel', linkArgs, { cwd: workspaceDir, stdio: 'pipe', timeout: 60000 })
+    if (linkResult.status !== 0) {
+      const msg = (linkResult.stderr?.toString() || '').slice(0, 200)
+      console.warn('[deployer] vercel link warning:', msg)
+    }
 
     // Step 2: Set env vars so the Vercel build can access them
     console.log('[deployer] Setting env vars...')
     setVercelEnvVars(workspaceDir, token, scope)
 
-    // Step 3: Deploy
+    // Step 3: Deploy — use spawnSync array form (no shell interpolation)
     console.log('[deployer] Running vercel --prod...')
-    const stdout = execSync(
-      ['vercel', '--token', token, '--prod', '--yes', ...scopeFlag].join(' '),
-      { cwd: workspaceDir, stdio: 'pipe', timeout: 300000 }
-    ).toString()
+    const deployArgs = ['--token', token, '--prod', '--yes', ...scopeFlag]
+    const result = spawnSync('vercel', deployArgs, {
+      cwd: workspaceDir,
+      stdio: 'pipe',
+      timeout: 300000,
+    })
 
-    const urlMatch = stdout.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
+    const stdout = (result.stdout?.toString() || '')
+    const stderr = (result.stderr?.toString() || '')
+    const combined = stdout + stderr
+
+    const urlMatch = combined.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
     const url = urlMatch ? urlMatch[0] : null
 
-    console.log(`[deployer] Deployed: ${url || 'URL not found in output'}`)
-    return { deployed: true, url, stdout: stdout.slice(0, 500) }
+    if (result.status !== 0 && !url) {
+      const reason = combined.slice(0, 300)
+      console.error('[deployer] Deploy failed:', reason)
+      return { deployed: false, url: null, reason }
+    }
 
+    console.log(`[deployer] Deployed: ${url || 'URL not found in output'}`)
+    return { deployed: !!url, url, stdout: stdout.slice(0, 500) }
   } catch (err) {
-    const reason = (err.stdout?.toString() || err.message || '').slice(0, 500)
-    console.error('[deployer] Deploy failed:', reason.slice(0, 300))
-    return { deployed: false, url: null, reason: reason.slice(0, 300) }
+    console.error('[deployer] Deploy error:', err.message?.slice(0, 300))
+    return { deployed: false, url: null, reason: err.message?.slice(0, 300) }
   }
 }
