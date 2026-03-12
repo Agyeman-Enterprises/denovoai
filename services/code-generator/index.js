@@ -57,7 +57,7 @@ async function generateScreen(screenId, userPrompt, spec) {
   console.log(`[codegen] Generating screen: ${screenId}...`)
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 8096,
+    max_tokens: 16000,
     messages: [{ role: 'user', content: userPrompt }]
   })
   const text = response.content[0].text.trim()

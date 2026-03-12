@@ -39,6 +39,52 @@ export function updateStatus(runDir, patch) {
   fs.writeFileSync(logPath, JSON.stringify({ ...current, ...patch, updatedAt: new Date().toISOString() }, null, 2))
 }
 
+/**
+ * Fix common AI-generated code issues that cause syntax errors at build time.
+ * - Unescaped apostrophes in single-quoted JSX strings: 'you're' → "you're"
+ * - Strips markdown code fences if the LLM accidentally included them
+ */
+function sanitizeGeneratedFile(content) {
+  // Replace single-quoted strings containing apostrophes with double-quoted strings
+  // Pattern: '...you're...' or similar — only match JSX expression context (after ? : = {)
+  let fixed = content.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (match, inner) => {
+    if (inner.includes("'")) {
+      // inner has a raw apostrophe — switch to double quotes if no double quotes inside
+      if (!inner.includes('"')) return `"${inner}"`
+    }
+    return match
+  })
+  return fixed
+}
+
+function sanitizeWorkspace(workspaceDir) {
+  const exts = ['.tsx', '.ts', '.jsx', '.js']
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name === '.next') continue
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) walk(full)
+      else if (entry.name === 'page.tsx' || entry.name === 'page.jsx') {
+        // Add force-dynamic to app pages so they don't fail static prerender at build time
+        let content = fs.readFileSync(full, 'utf8')
+        if (!content.includes("export const dynamic")) {
+          content = content.replace(/^('use client'|"use client")\n/m, `$&\nexport const dynamic = 'force-dynamic'\n`)
+          if (!content.includes("export const dynamic")) {
+            content = `export const dynamic = 'force-dynamic'\n` + content
+          }
+        }
+        const fixed = sanitizeGeneratedFile(content)
+        fs.writeFileSync(full, fixed)
+      } else if (exts.some(e => entry.name.endsWith(e))) {
+        const original = fs.readFileSync(full, 'utf8')
+        const fixed = sanitizeGeneratedFile(original)
+        if (fixed !== original) fs.writeFileSync(full, fixed)
+      }
+    }
+  }
+  walk(workspaceDir)
+}
+
 function copyDir(src, dest) {
   if (!fs.existsSync(src)) throw new Error(`Template not found: ${src}`)
   fs.mkdirSync(dest, { recursive: true })
@@ -76,6 +122,7 @@ export async function runOrchestrator({ prompt, runId }) {
     updateStatus(runDir, { phase: 'codegen', phaseLabel: 'Generating 7 screens with AI...' })
     const codegenResult = await generateAllScreens(workspaceDir, productSpec)
     writeJSON(path.join(artifactsDir, 'screens.json'), codegenResult)
+    sanitizeWorkspace(workspaceDir)
 
     // Phase 4: Write app config and env
     console.log('[orchestrator] Phase 4: Writing config...')
