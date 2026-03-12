@@ -45,11 +45,15 @@ export function updateStatus(runDir, patch) {
  * - Strips markdown code fences if the LLM accidentally included them
  */
 function sanitizeGeneratedFile(content) {
+  // Fix named import of default-exported Sidebar: { Sidebar } → default import
+  let fixed = content.replace(
+    /import\s*\{\s*Sidebar\s*\}\s*from\s*(['"])(@\/components\/app\/sidebar)\1/g,
+    "import Sidebar from '$2'"
+  )
+
   // Replace single-quoted strings containing apostrophes with double-quoted strings
-  // Pattern: '...you're...' or similar — only match JSX expression context (after ? : = {)
-  let fixed = content.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (match, inner) => {
+  fixed = fixed.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (match, inner) => {
     if (inner.includes("'")) {
-      // inner has a raw apostrophe — switch to double quotes if no double quotes inside
       if (!inner.includes('"')) return `"${inner}"`
     }
     return match

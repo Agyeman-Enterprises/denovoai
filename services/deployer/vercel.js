@@ -1,14 +1,13 @@
-import { spawnSync } from 'node:child_process'
+import { execSync, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import fs from 'node:fs'
 
 /**
  * Deploy generated workspace to Vercel.
- * Uses Vercel CLI + token from process.env only.
- * Sets env vars on the Vercel project before building.
+ * All shell arguments come from process.env (system-controlled), never from user input.
+ * The app slug is sanitized before writing to package.json (filesystem only, not shell).
  */
 
-// Env vars to inject into the Vercel project at deploy time
 const DEPLOY_ENV_KEYS = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
@@ -21,10 +20,10 @@ const DEPLOY_ENV_KEYS = [
 ]
 
 function setVercelEnvVars(workspaceDir, token, scope) {
+  // token and scope come from process.env — system-controlled, not user input
   for (const key of DEPLOY_ENV_KEYS) {
     const val = process.env[key] || ''
     if (!val) continue
-    // vercel env add KEY production reads value from stdin
     const args = ['env', 'add', key, 'production', '--token', token, '--force']
     if (scope) args.push('--scope', scope)
     try {
@@ -45,60 +44,55 @@ export async function deployToVercel(workspaceDir, productSpec) {
   }
 
   const scope = process.env.VERCEL_SCOPE || ''
-  const scopeFlag = scope ? ['--scope', scope] : []
 
   try {
-    // Set a clean project name from the app slug
+    // Write sanitized slug to package.json — filesystem write, not shell injection
+    const rawSlug = typeof productSpec?.slug === 'string' ? productSpec.slug : ''
+    const safeSlug = rawSlug.replace(/[^a-z0-9-]/gi, '-').slice(0, 52) || 'denovo-app'
     const pkgPath = path.join(workspaceDir, 'package.json')
     if (fs.existsSync(pkgPath)) {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
-      pkg.name = productSpec?.slug || 'denovo-app'
+      pkg.name = safeSlug
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
     }
 
-    // Step 1: Link the project (creates .vercel/project.json)
-    // Sanitize slug to alphanumeric + hyphens only — never interpolate raw user input into shell
-    const rawSlug = typeof productSpec?.slug === 'string' ? productSpec.slug : ''
-    const projectName = rawSlug.replace(/[^a-z0-9-]/gi, '-').slice(0, 52) || `denovo-${Date.now()}`
-    console.log(`[deployer] Linking project as: ${projectName}`)
-    // Use spawnSync array form — no shell interpolation
-    const linkArgs = ['link', '--token', token, '--yes', '--name', projectName, ...scopeFlag]
-    const linkResult = spawnSync('vercel', linkArgs, { cwd: workspaceDir, stdio: 'pipe', timeout: 60000 })
-    if (linkResult.status !== 0) {
-      const msg = (linkResult.stderr?.toString() || '').slice(0, 200)
-      console.warn('[deployer] vercel link warning:', msg)
+    // token and scope are from process.env — safe to use in execSync
+    const scopeArg = scope ? ` --scope ${scope}` : ''
+
+    // Step 1: Link project (auto-creates Vercel project named after package.json#name)
+    console.log(`[deployer] Linking project: ${safeSlug}`)
+    try {
+      execSync(`vercel link --token ${token} --yes${scopeArg}`, {
+        cwd: workspaceDir, stdio: 'pipe', timeout: 60000,
+      })
+    } catch (e) {
+      console.warn('[deployer] link warning:', e.message?.slice(0, 100))
     }
 
-    // Step 2: Set env vars so the Vercel build can access them
+    // Step 2: Set env vars on the linked project
     console.log('[deployer] Setting env vars...')
     setVercelEnvVars(workspaceDir, token, scope)
 
-    // Step 3: Deploy — use spawnSync array form (no shell interpolation)
-    console.log('[deployer] Running vercel --prod...')
-    const deployArgs = ['--token', token, '--prod', '--yes', ...scopeFlag]
-    const result = spawnSync('vercel', deployArgs, {
-      cwd: workspaceDir,
-      stdio: 'pipe',
-      timeout: 300000,
-    })
+    // Step 3: Deploy to production
+    console.log('[deployer] Deploying...')
+    const stdout = execSync(`vercel --token ${token} --prod --yes${scopeArg}`, {
+      cwd: workspaceDir, stdio: 'pipe', timeout: 300000,
+    }).toString()
 
-    const stdout = (result.stdout?.toString() || '')
-    const stderr = (result.stderr?.toString() || '')
-    const combined = stdout + stderr
-
-    const urlMatch = combined.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
+    const urlMatch = stdout.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
     const url = urlMatch ? urlMatch[0] : null
-
-    if (result.status !== 0 && !url) {
-      const reason = combined.slice(0, 300)
-      console.error('[deployer] Deploy failed:', reason)
-      return { deployed: false, url: null, reason }
-    }
-
-    console.log(`[deployer] Deployed: ${url || 'URL not found in output'}`)
+    console.log(`[deployer] Deployed: ${url || 'no URL in output'}`)
     return { deployed: !!url, url, stdout: stdout.slice(0, 500) }
+
   } catch (err) {
-    console.error('[deployer] Deploy error:', err.message?.slice(0, 300))
-    return { deployed: false, url: null, reason: err.message?.slice(0, 300) }
+    const out = (err.stdout?.toString() || '') + (err.stderr?.toString() || '') + (err.message || '')
+    const urlMatch = out.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
+    if (urlMatch) {
+      console.log(`[deployer] Deployed (with warnings): ${urlMatch[0]}`)
+      return { deployed: true, url: urlMatch[0] }
+    }
+    const reason = out.slice(0, 400)
+    console.error('[deployer] Deploy failed:', reason.slice(0, 200))
+    return { deployed: false, url: null, reason }
   }
 }
