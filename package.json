@@ -14,7 +14,11 @@
     "demo": "node services/orchestrator/run.js",
     "resolve": "node services/module-engine/resolve.js --example",
     "lint": "echo \"add eslint later\"",
-    "test": "node services/orchestrator/run.js --prompt \"self test\""
+    "test": "node services/orchestrator/run.js --prompt \"self test\"",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed",
+    "e2e:report": "playwright show-report"
   },
   "engines": {
     "node": ">=18.0.0"
