@@ -1,162 +1,152 @@
 #!/usr/bin/env node
 /**
- * DeNovo Orchestrator (offline demo)
- * - Intake prompt -> intent (mode/features/requested + product spec/design)
- * - Resolve modules with governance rules
- * - Apply knowledge patterns (adds recommended modules when compatible)
- * - Emit artifacts: ProductSpec.json, SystemDesign.json, RunLockfile.json, run-log.json
- * - Generate a static HTML "app" representing the build
+ * DeNovo Orchestrator — Claude-powered
+ * Prompt → ProductSpec → Generate all screens → Deploy → Return live URL
  */
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { interpretPrompt } from "../prompt-engine/index.js";
-import { resolveModules } from "../module-engine/resolve.js";
-import { applyKnowledgePatterns } from "../knowledge-engine/use-patterns.js";
-import { PHASES, nextPhase } from "./state-machine.js";
-import { buildStaticAppFromArtifacts } from "./render.js";
-import { validateOrWarn, schemaPath } from "../../packages/schemas/validate.js";
-import { materializeWorkspace } from "./workspace.js";
-import { customizeWorkspace, writeModulesApi } from "./customize.js";
-import { generateModulePages, generateSqlBundle } from "./codegen.js";
-import { applySqlBundle } from "./sql.js";
-import { runWorkspaceTests } from "./tests.js";
-import { deployToVercel } from "../deployer/vercel.js";
-import { installDeps, buildWorkspace } from "./build.js";
-import { propagateEnv } from "./env.js";
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
+import { interpretPrompt } from '../prompt-engine/index.js'
+import { generateAllScreens } from '../code-generator/index.js'
+import { deployToVercel } from '../deployer/vercel.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const root = path.resolve(__dirname, "..", "..");
-const runsDir = path.join(root, "runs");
-fs.mkdirSync(runsDir, { recursive: true });
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const root = path.resolve(__dirname, '..', '..')
+const runsDir = path.join(root, 'runs')
+const templateDir = path.join(root, 'templates', 'saas-base')
+fs.mkdirSync(runsDir, { recursive: true })
 
 function parseArgs() {
-  const argv = process.argv.slice(2);
-  const promptIdx = argv.indexOf("--prompt");
-  const prompt =
-    promptIdx !== -1 && argv[promptIdx + 1]
-      ? argv[promptIdx + 1]
-      : "Build a gardening community with photo uploads";
-  const allowExperimental = argv.includes("--allow-experimental");
-  return { prompt, allowExperimental };
+  const argv = process.argv.slice(2)
+  const promptIdx = argv.indexOf('--prompt')
+  const runIdIdx = argv.indexOf('--run-id')
+  return {
+    prompt: promptIdx !== -1 ? argv[promptIdx + 1] : 'Build a project management tool for freelancers',
+    runId: runIdIdx !== -1 ? argv[runIdIdx + 1] : `run-${Date.now()}`,
+  }
 }
 
 function writeJSON(p, data) {
-  fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(data, null, 2));
+  fs.mkdirSync(path.dirname(p), { recursive: true })
+  fs.writeFileSync(p, JSON.stringify(data, null, 2))
 }
 
-async function main() {
-  const { prompt, allowExperimental } = parseArgs();
-  const runId = `run-${Date.now()}`;
-  const runDir = path.join(runsDir, runId);
-  const artifactsDir = path.join(runDir, "artifacts");
-  fs.mkdirSync(runDir, { recursive: true });
-
-  const events = [];
-  let phase = "intake";
-  const pushEvent = (type, payload = {}) => {
-    events.push({ phase, type, payload, at: new Date().toISOString() });
-  };
-
-  // Intake -> Spec -> Design
-  const intent = interpretPrompt(prompt);
-  pushEvent("intake.complete", intent);
-  phase = nextPhase(phase);
-
-  pushEvent("spec.generated", intent.productSpec);
-  const specCheck = validateOrWarn(schemaPath("product-spec"), intent.productSpec);
-  pushEvent("spec.validated", specCheck);
-  phase = nextPhase(phase);
-
-  pushEvent("design.generated", intent.systemDesign);
-  const designCheck = validateOrWarn(schemaPath("system-design"), intent.systemDesign);
-  pushEvent("design.validated", designCheck);
-  phase = nextPhase(phase);
-
-  // Compose modules (usecase rules + knowledge patterns)
-  const knowledgeModules = applyKnowledgePatterns(intent.mode, intent.features);
-  const requested = [...intent.requested, ...knowledgeModules];
-  const { resolved, lockfile } = resolveModules({
-    mode: intent.mode,
-    features: intent.features,
-    requested,
-    allowExperimental,
-    experimentalPolicy: allowExperimental ? "allow" : "skip"
-  });
-  pushEvent("compose.resolved", { modules: resolved, lockfile });
-  phase = nextPhase(phase);
-
-  // Build (stub workspace materialization)
-  const workspaceDir = materializeWorkspace(runDir, { template: "saas-crud" });
-  pushEvent("build.workspace_created", { workspaceDir });
-  customizeWorkspace(workspaceDir, {
-    productSpec: intent.productSpec,
-    systemDesign: intent.systemDesign,
-    modules: resolved,
-    features: intent.features,
-    mode: intent.mode,
-    channel: lockfile.channel
-  });
-  pushEvent("build.workspace_customized", { workspaceDir });
-
-  // Module-aware codegen
-  generateModulePages(workspaceDir, resolved);
-  const sqlBundle = generateSqlBundle(runDir, resolved);
-  pushEvent("build.module_pages_generated", { count: resolved.length });
-  pushEvent("build.sql_bundle_generated", { path: sqlBundle });
-  writeModulesApi(workspaceDir, resolved);
-  pushEvent("build.api_modules_generated");
-
-  // Install deps + build (best effort)
-  propagateEnv(workspaceDir);
-  const installResult = installDeps(workspaceDir);
-  pushEvent("build.deps", installResult);
-  const buildResult = buildWorkspace(workspaceDir);
-  pushEvent("build.compile", buildResult);
-  phase = nextPhase(phase);
-
-  // Verify (best effort tests)
-  const testResult = runWorkspaceTests(workspaceDir);
-  pushEvent("verify.tests_run", testResult);
-  phase = nextPhase(phase);
-
-  // Apply SQL (best effort)
-  const sqlApply = applySqlBundle(sqlBundle);
-  pushEvent("deploy.sql_apply", sqlApply);
-
-  // Deploy (stub)
-  const deployResult = await deployToVercel(workspaceDir);
-  pushEvent("deploy.vercel", deployResult);
-  phase = nextPhase(phase);
-
-  // Complete
-  pushEvent("complete");
-
-  // Persist artifacts
-  writeJSON(path.join(artifactsDir, "ProductSpec.json"), intent.productSpec);
-  writeJSON(path.join(artifactsDir, "SystemDesign.json"), intent.systemDesign);
-  writeJSON(path.join(artifactsDir, "RunLockfile.json"), lockfile);
-  writeJSON(path.join(runDir, "run-log.json"), { id: runId, prompt, events, status: "complete" });
-
-  // Static app output
-  buildStaticAppFromArtifacts(runDir, {
-    productSpec: intent.productSpec,
-    systemDesign: intent.systemDesign,
-    modules: resolved,
-    features: intent.features,
-    mode: intent.mode,
-    channel: lockfile.channel
-  });
-
-  console.log("DeNovo run complete");
-  console.log(`Prompt: ${prompt}`);
-  console.log(`Mode: ${intent.mode}, Features: ${intent.features.join(", ") || "none"}`);
-  console.log(`Modules (${resolved.length}): ${resolved.map((m) => m.name).join(", ")}`);
-  console.log(`Artifacts: ${path.relative(root, artifactsDir)}`);
-  console.log(`Static app: ${path.relative(root, path.join(runDir, "app", "index.html"))}`);
+export function updateStatus(runDir, patch) {
+  const logPath = path.join(runDir, 'run-log.json')
+  const current = fs.existsSync(logPath) ? JSON.parse(fs.readFileSync(logPath, 'utf8')) : {}
+  fs.writeFileSync(logPath, JSON.stringify({ ...current, ...patch, updatedAt: new Date().toISOString() }, null, 2))
 }
 
-const invokedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
-if (invokedDirectly) main();
+function copyDir(src, dest) {
+  if (!fs.existsSync(src)) throw new Error(`Template not found: ${src}`)
+  fs.mkdirSync(dest, { recursive: true })
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === '.next') continue
+    const srcPath = path.join(src, entry.name)
+    const destPath = path.join(dest, entry.name)
+    if (entry.isDirectory()) copyDir(srcPath, destPath)
+    else fs.copyFileSync(srcPath, destPath)
+  }
+}
+
+export async function runOrchestrator({ prompt, runId }) {
+  const runDir = path.join(runsDir, runId)
+  const artifactsDir = path.join(runDir, 'artifacts')
+  const workspaceDir = path.join(runDir, 'workspace')
+  fs.mkdirSync(artifactsDir, { recursive: true })
+
+  updateStatus(runDir, { id: runId, prompt, status: 'running', phase: 'intent', phaseLabel: 'Analyzing your idea...', startedAt: new Date().toISOString() })
+
+  try {
+    // Phase 1: Interpret prompt with Claude
+    console.log('[orchestrator] Phase 1: Interpreting prompt...')
+    const intent = await interpretPrompt(prompt)
+    const { productSpec } = intent
+    writeJSON(path.join(artifactsDir, 'ProductSpec.json'), productSpec)
+    updateStatus(runDir, { phase: 'spec', phaseLabel: `Designing ${productSpec.displayName}...`, appName: productSpec.displayName, primaryColor: productSpec.primaryColor })
+
+    // Phase 2: Copy base template
+    console.log('[orchestrator] Phase 2: Copying template...')
+    copyDir(templateDir, workspaceDir)
+
+    // Phase 3: Generate all screens with Claude
+    console.log('[orchestrator] Phase 3: Generating screens...')
+    updateStatus(runDir, { phase: 'codegen', phaseLabel: 'Generating 7 screens with AI...' })
+    const codegenResult = await generateAllScreens(workspaceDir, productSpec)
+    writeJSON(path.join(artifactsDir, 'screens.json'), codegenResult)
+
+    // Phase 4: Write app config and env
+    console.log('[orchestrator] Phase 4: Writing config...')
+    updateStatus(runDir, { phase: 'config', phaseLabel: 'Writing configuration...' })
+
+    const envLines = [
+      `NEXT_PUBLIC_APP_NAME="${productSpec.displayName}"`,
+      `NEXT_PUBLIC_APP_TAGLINE="${productSpec.tagline}"`,
+      `NEXT_PUBLIC_PRIMARY_COLOR="${productSpec.primaryColor}"`,
+      `NEXT_PUBLIC_PRIMARY_FG="${productSpec.primaryForeground || '#ffffff'}"`,
+      `NEXT_PUBLIC_SECONDARY_COLOR="${productSpec.secondaryColor}"`,
+      `NEXT_PUBLIC_ACCENT_COLOR="${productSpec.accentColor}"`,
+      `NEXT_PUBLIC_SIDEBAR_BG="${productSpec.sidebarBg || '#f8fafc'}"`,
+      `NEXT_PUBLIC_SUPABASE_URL=${process.env.NEXT_PUBLIC_SUPABASE_URL || ''}`,
+      `NEXT_PUBLIC_SUPABASE_ANON_KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
+      `SUPABASE_SERVICE_ROLE_KEY=${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+      `STRIPE_SECRET_KEY=${process.env.STRIPE_SECRET_KEY || ''}`,
+      `STRIPE_WEBHOOK_SECRET=${process.env.STRIPE_WEBHOOK_SECRET || ''}`,
+      `STRIPE_PRICE_PRO_MONTHLY=${process.env.STRIPE_PRICE_PRO_MONTHLY || ''}`,
+      `NEXT_PUBLIC_APP_URL=${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
+      `APP_MAIN_TABLE=${productSpec.dbSchema?.mainTable || 'items'}`,
+    ]
+    fs.writeFileSync(path.join(workspaceDir, '.env.local'), envLines.join('\n'))
+
+    if (productSpec.dbSchema?.sql) {
+      fs.writeFileSync(path.join(artifactsDir, 'schema.sql'), productSpec.dbSchema.sql)
+    }
+
+    // Phase 5: Install dependencies
+    console.log('[orchestrator] Phase 5: Installing dependencies...')
+    updateStatus(runDir, { phase: 'install', phaseLabel: 'Installing packages (~60s)...' })
+    try {
+      execSync('npm install --ignore-scripts', {
+        cwd: workspaceDir, stdio: 'pipe', timeout: 180000,
+      })
+    } catch (e) {
+      console.warn('[orchestrator] npm install warning:', e.stderr?.toString()?.slice(0, 200))
+    }
+
+    // Phase 6: Deploy to Vercel
+    console.log('[orchestrator] Phase 6: Deploying...')
+    updateStatus(runDir, { phase: 'deploy', phaseLabel: 'Deploying to Vercel...' })
+    const deployResult = await deployToVercel(workspaceDir, productSpec)
+    writeJSON(path.join(artifactsDir, 'deploy.json'), deployResult)
+
+    const finalStatus = {
+      status: deployResult.deployed ? 'complete' : 'built',
+      phase: 'complete',
+      phaseLabel: deployResult.url ? 'Live! 🎉' : 'Built (set VERCEL_TOKEN to deploy)',
+      deployUrl: deployResult.url || null,
+      completedAt: new Date().toISOString(),
+    }
+    updateStatus(runDir, finalStatus)
+
+    console.log(`[orchestrator] Done: ${productSpec.displayName}`)
+    if (deployResult.url) console.log(`[orchestrator] Live: ${deployResult.url}`)
+    return { ok: true, runId, ...finalStatus, productSpec }
+
+  } catch (err) {
+    console.error('[orchestrator] Error:', err.message)
+    updateStatus(runDir, { status: 'error', error: err.message, phase: 'error', phaseLabel: 'Build failed' })
+    return { ok: false, runId, error: err.message }
+  }
+}
+
+// CLI entrypoint
+const invokedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+if (invokedDirectly) {
+  const { prompt, runId } = parseArgs()
+  runOrchestrator({ prompt, runId }).then(result => {
+    console.log(JSON.stringify(result, null, 2))
+    process.exit(result.ok ? 0 : 1)
+  })
+}

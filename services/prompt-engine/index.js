@@ -1,90 +1,104 @@
 /**
- * Prompt Engine (heuristic stub).
- * Converts a free-form prompt into structured intent:
- * - mode
- * - features (flags)
- * - requested modules (explicit asks)
- * - product spec + acceptance tests
- *
- * This is intentionally deterministic and dependency-free so it can run offline.
- * Swap this module with an LLM-backed version later.
+ * DeNovo Prompt Engine — Claude-powered
+ * Replaces keyword-matching stub with real LLM intent extraction.
  */
-import crypto from "node:crypto";
+import Anthropic from '@anthropic-ai/sdk'
 
-const MODES = ["community", "marketplace", "booking", "saas_dashboard"];
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-const FEATURE_KEYWORDS = {
-  payments: ["payment", "checkout", "stripe", "sell", "buy", "commerce", "billing"],
-  marketplace: ["sell", "buy", "marketplace", "catalog", "listings"],
-  uploads: ["upload", "photo", "image", "media"],
-  messaging: ["chat", "message", "dm"],
-  ai: ["ai", "agent", "copilot", "recommendation"],
-  private_groups: ["private", "group"]
-};
+const SPEC_PROMPT = `You are an expert product architect and UI designer. Analyze this app idea and return a comprehensive ProductSpec as JSON.
 
-const MODE_KEYWORDS = {
-  community: ["community", "forum", "social", "group"],
-  marketplace: ["marketplace", "store", "shop", "buy", "sell"],
-  booking: ["book", "reservation", "schedule", "calendar"],
-  saas_dashboard: ["dashboard", "crm", "admin", "analytics"]
-};
+App idea: "{PROMPT}"
 
-export function interpretPrompt(prompt) {
-  const lower = prompt.toLowerCase();
+Return ONLY valid JSON (no markdown, no fences). Follow this schema exactly:
 
-  let mode = "community";
-  for (const [candidate, words] of Object.entries(MODE_KEYWORDS)) {
-    if (words.some((w) => lower.includes(w))) {
-      mode = candidate;
-      break;
+{
+  "name": "AppName",
+  "slug": "app-name",
+  "displayName": "App Display Name",
+  "tagline": "Short punchy tagline, max 8 words",
+  "description": "2-3 sentences describing what this app does and for whom",
+  "mode": "saas_dashboard",
+  "primaryColor": "#hexcode (vibrant main brand color)",
+  "primaryForeground": "#ffffff or #000000 (contrasting text color)",
+  "secondaryColor": "#hexcode (lighter complementary color)",
+  "accentColor": "#hexcode (accent/highlight)",
+  "borderColor": "#e2e8f0",
+  "backgroundColor": "#ffffff",
+  "sidebarBg": "#f8fafc",
+  "coreEntity": "singular lowercase noun (e.g. project, dog, listing)",
+  "coreEntityPlural": "plural form",
+  "coreEntityFields": [
+    { "name": "title", "label": "Title", "type": "text", "required": true },
+    { "name": "description", "label": "Description", "type": "textarea", "required": false },
+    { "name": "status", "label": "Status", "type": "select", "options": ["active", "draft", "archived"], "required": false }
+  ],
+  "targetAudience": "one sentence describing who uses this",
+  "screens": [
+    { "id": "onboarding", "name": "Get Started", "description": "Welcome screen for new users, shows value prop and setup steps" },
+    { "id": "dashboard", "name": "Dashboard", "description": "Main home with stats cards and recent activity feed" },
+    { "id": "list", "name": "All Items", "description": "Searchable, filterable table/grid of the core entity" },
+    { "id": "detail", "name": "Item Detail", "description": "View and edit a single item with all its fields" },
+    { "id": "settings", "name": "Settings", "description": "Account preferences, profile, notifications" },
+    { "id": "billing", "name": "Billing", "description": "Plan overview, usage stats, upgrade CTA" }
+  ],
+  "navItems": [
+    { "label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard" },
+    { "label": "Items", "href": "/items", "icon": "List" },
+    { "label": "Settings", "href": "/settings", "icon": "Settings" }
+  ],
+  "dbSchema": {
+    "mainTable": "items",
+    "sql": "CREATE TABLE IF NOT EXISTS items (\\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\\n  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\\n  title TEXT NOT NULL,\\n  description TEXT,\\n  status TEXT DEFAULT 'active',\\n  created_at TIMESTAMPTZ DEFAULT NOW(),\\n  updated_at TIMESTAMPTZ DEFAULT NOW()\\n);\\n\\nALTER TABLE items ENABLE ROW LEVEL SECURITY;\\nCREATE POLICY \\"Users own their items\\" ON items\\n  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);"
+  },
+  "landingHero": {
+    "headline": "Compelling headline, max 8 words",
+    "subheadline": "Supporting text 1-2 sentences explaining the value proposition",
+    "ctaText": "Get Started Free",
+    "features": [
+      { "icon": "Zap", "title": "Feature 1", "description": "Short benefit" },
+      { "icon": "Shield", "title": "Feature 2", "description": "Short benefit" },
+      { "icon": "Globe", "title": "Feature 3", "description": "Short benefit" },
+      { "icon": "Sparkles", "title": "Feature 4", "description": "Short benefit" },
+      { "icon": "Rocket", "title": "Feature 5", "description": "Short benefit" },
+      { "icon": "Star", "title": "Feature 6", "description": "Short benefit" }
+    ]
+  },
+  "pricingPlans": [
+    { "name": "Free", "price": 0, "description": "Perfect to get started", "features": ["5 items/month", "Basic features", "Email support"], "cta": "Get Started" },
+    { "name": "Pro", "price": 29, "description": "For power users", "features": ["Unlimited items", "All features", "Priority support", "Analytics"], "cta": "Upgrade to Pro", "popular": true }
+  ]
+}`
+
+export async function interpretPrompt(prompt) {
+  console.log('[prompt-engine] Calling Claude to interpret prompt...')
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 4096,
+    messages: [{
+      role: 'user',
+      content: SPEC_PROMPT.replace('{PROMPT}', prompt.replace(/"/g, '\\"'))
+    }]
+  })
+
+  const text = response.content[0].text.trim()
+  const clean = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
+  const productSpec = JSON.parse(clean)
+
+  console.log(`[prompt-engine] App: "${productSpec.displayName}" | Entity: ${productSpec.coreEntity}`)
+
+  return {
+    mode: productSpec.mode || 'saas_dashboard',
+    features: ['auth', 'dashboard', 'crud', 'search', 'stripe_billing'],
+    requested: [],
+    productSpec,
+    systemDesign: {
+      architecture: 'next-app-router',
+      database: 'supabase',
+      auth: 'supabase-auth',
+      payments: 'stripe',
+      deployment: 'vercel'
     }
   }
-
-  const features = [];
-  for (const [flag, words] of Object.entries(FEATURE_KEYWORDS)) {
-    if (words.some((w) => lower.includes(w))) features.push(flag);
-  }
-
-  const requested = [];
-  if (lower.includes("private")) requested.push("private_groups");
-
-  const appName = deriveAppName(prompt, mode);
-
-  const productSpec = {
-    app_name: appName,
-    target_users: ["early adopters", "power users", "public beta"],
-    jobs_to_be_done: [`${appName}: deliver value for ${mode} use case`],
-    core_features: features.map((f, i) => ({ name: f, priority: i + 1 })),
-    non_goals: ["security/compliance not production-hardened in stub"],
-    constraints: ["generated offline demo"],
-    acceptance_tests: [
-      "User can sign in",
-      "User can perform the primary action for this mode",
-      "Smoke test passes"
-    ]
-  };
-
-  const systemDesign = {
-    services: [
-      { name: "frontend", responsibilities: ["render UI", "call APIs"] },
-      { name: "backend", responsibilities: ["expose APIs", "business logic"] }
-    ],
-    data_models: [
-      { name: "users", fields: [{ name: "id", type: "uuid" }, { name: "email", type: "text" }] }
-    ],
-    api_endpoints: [{ method: "GET", path: "/health", description: "health check" }],
-    auth_model: { strategy: "magic_link", roles: ["user", "admin"] },
-    observability: { metrics: ["health_check"], logs: ["requests"] }
-  };
-
-  return { mode, features, requested, productSpec, systemDesign };
 }
-
-function deriveAppName(prompt, mode) {
-  const words = prompt.split(/\s+/).filter(Boolean);
-  const base = words.slice(0, 3).join(" ") || "DeNovo App";
-  const hash = crypto.createHash("md5").update(prompt).digest("hex").slice(0, 4);
-  return `${capitalize(base)} (${capitalize(mode)}-${hash})`;
-}
-
-const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);

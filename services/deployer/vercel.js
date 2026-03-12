@@ -1,43 +1,50 @@
-import { execSync } from "node:child_process";
-import path from "node:path";
-import fs from "node:fs";
+import { execSync } from 'node:child_process'
+import path from 'node:path'
+import fs from 'node:fs'
 
 /**
- * Deploy to Vercel using vercel CLI if VERCE L_TOKEN is set.
- * Assumes the user has `vercel` CLI available in PATH.
+ * Deploy generated workspace to Vercel.
+ * Uses Vercel CLI + token. Parses the deployment URL from stdout.
  */
-export async function deployToVercel(workspaceDir) {
-  const token = process.env.VERCEL_TOKEN;
+export async function deployToVercel(workspaceDir, productSpec) {
+  const token = process.env.VERCEL_TOKEN
   if (!token) {
-    return { deployed: false, reason: "VERCEL_TOKEN not set" };
+    console.warn('[deployer] VERCEL_TOKEN not set — skipping deploy')
+    return { deployed: false, url: null, reason: 'VERCEL_TOKEN not set' }
   }
+
   try {
-    // ensure project name
-    const pkgPath = path.join(workspaceDir, "package.json");
+    // Set a clean project name from the app slug
+    const pkgPath = path.join(workspaceDir, 'package.json')
     if (fs.existsSync(pkgPath)) {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-      if (!pkg.name) {
-        pkg.name = "denovo-app";
-        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-      }
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+      pkg.name = productSpec?.slug || 'denovo-app'
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
     }
-    const envFlags = [];
-    // If .env.local exists, Vercel CLI can pick it up with --env-file
-    const envFile = path.join(workspaceDir, ".env.local");
-    if (fs.existsSync(envFile)) {
-      envFlags.push("--env-file", ".env.local");
-    }
-    execSync(`vercel --token ${token} --prod --confirm ${envFlags.join(" ")}`, {
-      cwd: workspaceDir,
-      stdio: "pipe"
-    });
-    // Get latest deployment URL
-    const url = execSync(`vercel --token ${token} --prod ls --json`, {
-      cwd: workspaceDir,
-      stdio: "pipe"
-    }).toString();
-    return { deployed: true, url };
+
+    // Write .vercel/project.json to avoid interactive prompts
+    const vercelDir = path.join(workspaceDir, '.vercel')
+    fs.mkdirSync(vercelDir, { recursive: true })
+    fs.writeFileSync(path.join(vercelDir, 'project.json'), JSON.stringify({
+      projectId: null,
+      orgId: null,
+    }))
+
+    console.log('[deployer] Running vercel --prod...')
+    const stdout = execSync(
+      `vercel --token ${token} --prod --yes --no-clipboard`,
+      { cwd: workspaceDir, stdio: 'pipe', timeout: 180000 }
+    ).toString()
+
+    // Extract the deployment URL from stdout
+    const urlMatch = stdout.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
+    const url = urlMatch ? urlMatch[0] : null
+
+    console.log(`[deployer] Deployed: ${url || 'URL not found in output'}`)
+    return { deployed: true, url, stdout: stdout.slice(0, 500) }
+
   } catch (err) {
-    return { deployed: false, reason: err.message };
+    console.error('[deployer] Deploy failed:', err.message?.slice(0, 300))
+    return { deployed: false, url: null, reason: err.message?.slice(0, 300) }
   }
 }

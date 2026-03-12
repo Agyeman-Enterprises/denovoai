@@ -3,9 +3,11 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   webpack: (config) => {
-    const workspaceRoot = path.resolve(__dirname, '../..')
-    const reactDir = path.join(workspaceRoot, 'node_modules/react')
-    const reactDomDir = path.join(workspaceRoot, 'node_modules/react-dom')
+    // Force single React instance using require.resolve (gives canonical OS path)
+    const reactPkg = require.resolve('react/package.json')
+    const reactDomPkg = require.resolve('react-dom/package.json')
+    const reactDir = path.dirname(reactPkg)
+    const reactDomDir = path.dirname(reactDomPkg)
     config.resolve.alias = {
       ...config.resolve.alias,
       react: reactDir,

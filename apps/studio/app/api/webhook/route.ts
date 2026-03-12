@@ -3,8 +3,8 @@ import { stripe } from '@/lib/stripe/client'
 import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 
-// Must export this config to disable body parsing (Stripe needs raw body)
-export const config = { api: { bodyParser: false } }
+// App Router: disable body parser via route segment config
+export const dynamic = 'force-dynamic'
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!

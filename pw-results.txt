@@ -1,0 +1,937 @@
+ℹ️  Global setup: no E2E credentials — auth tests will be skipped
+
+Running 51 tests using 1 worker
+
+  x   1 [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 (484ms)
+  x   2 [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title (396ms)
+  x   3 [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present (5.4s)
+  x   4 [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible (5.4s)
+  -   5 [chromium] › e2e\specs\01.auth.spec.ts:10:3 › auth › login page renders with email + password fields and visibility toggle
+  -   6 [chromium] › e2e\specs\01.auth.spec.ts:17:3 › auth › password visibility toggle works
+  -   7 [chromium] › e2e\specs\01.auth.spec.ts:29:3 › auth › shows error on bad credentials
+  -   8 [chromium] › e2e\specs\01.auth.spec.ts:37:3 › auth › can sign up, then log in, then log out
+  -   9 [chromium] › e2e\specs\01.auth.spec.ts:53:3 › auth › nav-user-menu shows user email when logged in
+  x  10 [chromium] › e2e\specs\02.dashboard.spec.ts:9:3 › dashboard / home › home page renders with app-root (5.4s)
+  x  11 [chromium] › e2e\specs\02.dashboard.spec.ts:13:3 › dashboard / home › feature cards section is visible (5.4s)
+  x  12 [chromium] › e2e\specs\02.dashboard.spec.ts:17:3 › dashboard / home › AI Development card is present (5.4s)
+  x  13 [chromium] › e2e\specs\02.dashboard.spec.ts:21:3 › dashboard / home › Smart Templates card is present (5.4s)
+  x  14 [chromium] › e2e\specs\02.dashboard.spec.ts:25:3 › dashboard / home › Orchestration card is present (5.4s)
+  x  15 [chromium] › e2e\specs\02.dashboard.spec.ts:29:3 › dashboard / home › Module Engine card is present (5.4s)
+  x  16 [chromium] › e2e\specs\02.dashboard.spec.ts:33:3 › dashboard / home › primary-list section renders (5.4s)
+  x  17 [chromium] › e2e\specs\02.dashboard.spec.ts:37:3 › dashboard / home › create-primary button is present (5.4s)
+  x  18 [chromium] › e2e\specs\02.dashboard.spec.ts:41:3 › dashboard / home › search-primary input is present (5.4s)
+  x  19 [chromium] › e2e\specs\02.dashboard.spec.ts:45:3 › dashboard / home › Recent Runs heading is visible (5.4s)
+  x  20 [chromium] › e2e\specs\03.crud.spec.ts:9:3 › crud — runs › primary-list is present on home (5.4s)
+  x  21 [chromium] › e2e\specs\03.crud.spec.ts:13:3 › crud — runs › create-primary button is visible (5.4s)
+  x  22 [chromium] › e2e\specs\03.crud.spec.ts:17:3 › crud — runs › create-primary is disabled when prompt is empty (5.4s)
+  x  23 [chromium] › e2e\specs\03.crud.spec.ts:21:3 › crud — runs › create-primary enables when prompt is filled (30.1s)
+  x  24 [chromium] › e2e\specs\03.crud.spec.ts:26:3 › crud — runs › prompt input clears after filling and clearing (30.1s)
+  x  25 [chromium] › e2e\specs\03.crud.spec.ts:34:3 › crud — runs › search-primary filters the run list (30.1s)
+  x  26 [chromium] › e2e\specs\03.crud.spec.ts:41:3 › crud — runs › empty state shows when no runs exist (5.4s)
+  x  27 [chromium] › e2e\specs\04.forms.spec.ts:9:3 › forms › create-run-form is present (5.4s)
+  x  28 [chromium] › e2e\specs\04.forms.spec.ts:13:3 › forms › run-prompt-input accepts text (30.1s)
+  x  29 [chromium] › e2e\specs\04.forms.spec.ts:19:3 › forms › submit button is disabled when prompt is empty (5.4s)
+  x  30 [chromium] › e2e\specs\04.forms.spec.ts:23:3 › forms › submit button is enabled when prompt is filled (30.1s)
+  x  31 [chromium] › e2e\specs\04.forms.spec.ts:28:3 › forms › prompt input has correct placeholder (5.4s)
+  x  32 [chromium] › e2e\specs\04.forms.spec.ts:33:3 › forms › form has correct aria label on input (5.4s)
+  x  33 [chromium] › e2e\specs\04.forms.spec.ts:38:3 › forms › search input has correct aria label (5.4s)
+  -  34 [chromium] › e2e\specs\05.session.spec.ts:18:3 › session › session persists across page reload
+  -  35 [chromium] › e2e\specs\05.session.spec.ts:27:3 › session › session persists across navigation
+  -  36 [chromium] › e2e\specs\05.session.spec.ts:36:3 › session › logout clears session — protected pages redirect to login
+  -  37 [chromium] › e2e\specs\05.session.spec.ts:48:3 › session › unauthenticated user redirected to login from billing
+  -  38 [chromium] › e2e\specs\06.permissions.spec.ts:18:3 › permissions › unauthenticated user sees sign-in prompt, not create form
+  -  39 [chromium] › e2e\specs\06.permissions.spec.ts:32:3 › permissions › authenticated user can see create form
+  -  40 [chromium] › e2e\specs\06.permissions.spec.ts:38:3 › permissions › free user sees run count in nav
+  -  41 [chromium] › e2e\specs\06.permissions.spec.ts:48:3 › permissions › billing page accessible to authenticated user
+  -  42 [chromium] › e2e\specs\06.permissions.spec.ts:55:3 › permissions › billing page redirects unauthenticated user to login
+  -  43 [chromium] › e2e\specs\06.permissions.spec.ts:60:3 › permissions › API runs endpoint returns 401 for unauthenticated POST when supabase configured
+  -  44 [chromium] › e2e\specs\07.checkout.spec.ts:19:3 › checkout › billing page shows current plan and run usage
+  -  45 [chromium] › e2e\specs\07.checkout.spec.ts:25:3 › checkout › free user sees upgrade button on billing page
+  -  46 [chromium] › e2e\specs\07.checkout.spec.ts:39:3 › checkout › checkout button triggers Stripe redirect when Stripe configured
+  -  47 [chromium] › e2e\specs\07.checkout.spec.ts:66:3 › checkout › checkout API returns 503 when Stripe not configured
+  -  48 [chromium] › e2e\specs\07.checkout.spec.ts:75:3 › checkout › billing page has logout button
+  x  49 [chromium] › e2e\specs\08.console.spec.ts:16:3 › console + network health › no uncaught JS errors on home load (945ms)
+  x  50 [chromium] › e2e\specs\08.console.spec.ts:26:3 › console + network health › no 500 responses on home load (926ms)
+  x  51 [chromium] › e2e\specs\08.console.spec.ts:38:3 › console + network health › runs API returns 200 (822ms)
+
+
+  1) [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 ──────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m500[39m
+
+       5 |   test('app loads with 200', async ({ page }) => {
+       6 |     const res = await page.goto(APP_CONTRACT.routes.root)
+    >  7 |     expect(res?.status()).toBe(200)
+         |                           ^
+       8 |   })
+       9 |
+      10 |   test('page has title', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:7:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00.smoke-smoke-app-loads-with-200-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\00.smoke-smoke-app-loads-with-200-chromium\error-context.md
+
+  2) [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title ─────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      11 |     await page.goto(APP_CONTRACT.routes.root)
+      12 |     const title = await page.title()
+    > 13 |     expect(title.length).toBeGreaterThan(0)
+         |                          ^
+      14 |   })
+      15 |
+      16 |   test('app-root is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:13:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00.smoke-smoke-page-has-title-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\00.smoke-smoke-page-has-title-chromium\error-context.md
+
+  3) [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present ────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('app-root')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('app-root')[22m
+
+
+      16 |   test('app-root is present', async ({ page }) => {
+      17 |     await page.goto(APP_CONTRACT.routes.root)
+    > 18 |     await expect(page.getByTestId(APP_CONTRACT.testIds.appRoot)).toBeVisible()
+         |                                                                  ^
+      19 |   })
+      20 |
+      21 |   test('hero heading is visible', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:18:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00.smoke-smoke-app-root-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\00.smoke-smoke-app-root-is-present-chromium\error-context.md
+
+  4) [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible ────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('hero-heading')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('hero-heading')[22m
+
+
+      21 |   test('hero heading is visible', async ({ page }) => {
+      22 |     await page.goto(APP_CONTRACT.routes.root)
+    > 23 |     await expect(page.getByTestId(APP_CONTRACT.testIds.heroHeading)).toBeVisible()
+         |                                                                      ^
+      24 |     await expect(page.getByTestId(APP_CONTRACT.testIds.heroHeading)).toContainText('Denovo AI')
+      25 |   })
+      26 | })
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:23:70
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00.smoke-smoke-hero-heading-is-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\00.smoke-smoke-hero-heading-is-visible-chromium\error-context.md
+
+  5) [chromium] › e2e\specs\02.dashboard.spec.ts:9:3 › dashboard / home › home page renders with app-root 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('app-root')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('app-root')[22m
+
+
+       8 |
+       9 |   test('home page renders with app-root', async ({ page }) => {
+    > 10 |     await expect(page.getByTestId(APP_CONTRACT.testIds.appRoot)).toBeVisible()
+         |                                                                  ^
+      11 |   })
+      12 |
+      13 |   test('feature cards section is visible', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:10:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-home-page-renders-with-app-root-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-home-page-renders-with-app-root-chromium\error-context.md
+
+  6) [chromium] › e2e\specs\02.dashboard.spec.ts:13:3 › dashboard / home › feature cards section is visible 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('feature-cards')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('feature-cards')[22m
+
+
+      12 |
+      13 |   test('feature cards section is visible', async ({ page }) => {
+    > 14 |     await expect(page.getByTestId(APP_CONTRACT.testIds.featureCards)).toBeVisible()
+         |                                                                       ^
+      15 |   })
+      16 |
+      17 |   test('AI Development card is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:14:71
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-feature-cards-section-is-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-feature-cards-section-is-visible-chromium\error-context.md
+
+  7) [chromium] › e2e\specs\02.dashboard.spec.ts:17:3 › dashboard / home › AI Development card is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: 'AI Development' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'AI Development' })[22m
+
+
+      16 |
+      17 |   test('AI Development card is present', async ({ page }) => {
+    > 18 |     await expect(page.getByRole('heading', { name: 'AI Development' })).toBeVisible()
+         |                                                                         ^
+      19 |   })
+      20 |
+      21 |   test('Smart Templates card is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:18:73
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-AI-Development-card-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-AI-Development-card-is-present-chromium\error-context.md
+
+  8) [chromium] › e2e\specs\02.dashboard.spec.ts:21:3 › dashboard / home › Smart Templates card is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: 'Smart Templates' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Smart Templates' })[22m
+
+
+      20 |
+      21 |   test('Smart Templates card is present', async ({ page }) => {
+    > 22 |     await expect(page.getByRole('heading', { name: 'Smart Templates' })).toBeVisible()
+         |                                                                          ^
+      23 |   })
+      24 |
+      25 |   test('Orchestration card is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:22:74
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-Smart-Templates-card-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-Smart-Templates-card-is-present-chromium\error-context.md
+
+  9) [chromium] › e2e\specs\02.dashboard.spec.ts:25:3 › dashboard / home › Orchestration card is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('Orchestration')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('Orchestration')[22m
+
+
+      24 |
+      25 |   test('Orchestration card is present', async ({ page }) => {
+    > 26 |     await expect(page.getByText('Orchestration')).toBeVisible()
+         |                                                   ^
+      27 |   })
+      28 |
+      29 |   test('Module Engine card is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:26:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-Orchestration-card-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-Orchestration-card-is-present-chromium\error-context.md
+
+  10) [chromium] › e2e\specs\02.dashboard.spec.ts:29:3 › dashboard / home › Module Engine card is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('Module Engine')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('Module Engine')[22m
+
+
+      28 |
+      29 |   test('Module Engine card is present', async ({ page }) => {
+    > 30 |     await expect(page.getByText('Module Engine')).toBeVisible()
+         |                                                   ^
+      31 |   })
+      32 |
+      33 |   test('primary-list section renders', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:30:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-Module-Engine-card-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-Module-Engine-card-is-present-chromium\error-context.md
+
+  11) [chromium] › e2e\specs\02.dashboard.spec.ts:33:3 › dashboard / home › primary-list section renders 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('primary-list')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('primary-list')[22m
+
+
+      32 |
+      33 |   test('primary-list section renders', async ({ page }) => {
+    > 34 |     await expect(page.getByTestId(APP_CONTRACT.testIds.primaryList)).toBeVisible()
+         |                                                                      ^
+      35 |   })
+      36 |
+      37 |   test('create-primary button is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:34:70
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-primary-list-section-renders-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-primary-list-section-renders-chromium\error-context.md
+
+  12) [chromium] › e2e\specs\02.dashboard.spec.ts:37:3 › dashboard / home › create-primary button is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('create-primary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('create-primary')[22m
+
+
+      36 |
+      37 |   test('create-primary button is present', async ({ page }) => {
+    > 38 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeVisible()
+         |                                                                        ^
+      39 |   })
+      40 |
+      41 |   test('search-primary input is present', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:38:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-create-primary-button-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-create-primary-button-is-present-chromium\error-context.md
+
+  13) [chromium] › e2e\specs\02.dashboard.spec.ts:41:3 › dashboard / home › search-primary input is present 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('search-primary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('search-primary')[22m
+
+
+      40 |
+      41 |   test('search-primary input is present', async ({ page }) => {
+    > 42 |     await expect(page.getByTestId(APP_CONTRACT.testIds.searchPrimary)).toBeVisible()
+         |                                                                        ^
+      43 |   })
+      44 |
+      45 |   test('Recent Runs heading is visible', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:42:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-search-primary-input-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-search-primary-input-is-present-chromium\error-context.md
+
+  14) [chromium] › e2e\specs\02.dashboard.spec.ts:45:3 › dashboard / home › Recent Runs heading is visible 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: 'Recent Runs' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Recent Runs' })[22m
+
+
+      44 |
+      45 |   test('Recent Runs heading is visible', async ({ page }) => {
+    > 46 |     await expect(page.getByRole('heading', { name: 'Recent Runs' })).toBeVisible()
+         |                                                                      ^
+      47 |   })
+      48 | })
+      49 |
+        at C:\DEV\denovoai\e2e\specs\02.dashboard.spec.ts:46:70
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\02.dashboard-dashboard-home-Recent-Runs-heading-is-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\02.dashboard-dashboard-home-Recent-Runs-heading-is-visible-chromium\error-context.md
+
+  15) [chromium] › e2e\specs\03.crud.spec.ts:9:3 › crud — runs › primary-list is present on home ───
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('primary-list')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('primary-list')[22m
+
+
+       8 |
+       9 |   test('primary-list is present on home', async ({ page }) => {
+    > 10 |     await expect(page.getByTestId(APP_CONTRACT.testIds.primaryList)).toBeVisible()
+         |                                                                      ^
+      11 |   })
+      12 |
+      13 |   test('create-primary button is visible', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:10:70
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-primary-list-is-present-on-home-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-primary-list-is-present-on-home-chromium\error-context.md
+
+  16) [chromium] › e2e\specs\03.crud.spec.ts:13:3 › crud — runs › create-primary button is visible ─
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('create-primary')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('create-primary')[22m
+
+
+      12 |
+      13 |   test('create-primary button is visible', async ({ page }) => {
+    > 14 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeVisible()
+         |                                                                        ^
+      15 |   })
+      16 |
+      17 |   test('create-primary is disabled when prompt is empty', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:14:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-create-primary-button-is-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-create-primary-button-is-visible-chromium\error-context.md
+
+  17) [chromium] › e2e\specs\03.crud.spec.ts:17:3 › crud — runs › create-primary is disabled when prompt is empty 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeDisabled[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('create-primary')
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeDisabled" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('create-primary')[22m
+
+
+      16 |
+      17 |   test('create-primary is disabled when prompt is empty', async ({ page }) => {
+    > 18 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeDisabled()
+         |                                                                        ^
+      19 |   })
+      20 |
+      21 |   test('create-primary enables when prompt is filled', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:18:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-create-b80a4-sabled-when-prompt-is-empty-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-create-b80a4-sabled-when-prompt-is-empty-chromium\error-context.md
+
+  18) [chromium] › e2e\specs\03.crud.spec.ts:21:3 › crud — runs › create-primary enables when prompt is filled 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('run-prompt-input')[22m
+
+
+      20 |
+      21 |   test('create-primary enables when prompt is filled', async ({ page }) => {
+    > 22 |     await page.getByTestId(APP_CONTRACT.testIds.runPromptInput).fill('Build a task manager')
+         |                                                                 ^
+      23 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeEnabled()
+      24 |   })
+      25 |
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:22:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-create-13d5c-ables-when-prompt-is-filled-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-create-13d5c-ables-when-prompt-is-filled-chromium\error-context.md
+
+  19) [chromium] › e2e\specs\03.crud.spec.ts:26:3 › crud — runs › prompt input clears after filling and clearing 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('run-prompt-input')[22m
+
+
+      26 |   test('prompt input clears after filling and clearing', async ({ page }) => {
+      27 |     const input = page.getByTestId(APP_CONTRACT.testIds.runPromptInput)
+    > 28 |     await input.fill('Build a test app')
+         |                 ^
+      29 |     await expect(input).toHaveValue('Build a test app')
+      30 |     await input.fill('')
+      31 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeDisabled()
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:28:17
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-prompt-74f69--after-filling-and-clearing-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-prompt-74f69--after-filling-and-clearing-chromium\error-context.md
+
+  20) [chromium] › e2e\specs\03.crud.spec.ts:34:3 › crud — runs › search-primary filters the run list 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('search-primary')[22m
+
+
+      34 |   test('search-primary filters the run list', async ({ page }) => {
+      35 |     const search = page.getByTestId(APP_CONTRACT.testIds.searchPrimary)
+    > 36 |     await search.fill('nonexistent_xyz_12345')
+         |                  ^
+      37 |     // Primary list still renders (empty state or filtered)
+      38 |     await expect(page.getByTestId(APP_CONTRACT.testIds.primaryList)).toBeVisible()
+      39 |   })
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:36:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-search-primary-filters-the-run-list-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-search-primary-filters-the-run-list-chromium\error-context.md
+
+  21) [chromium] › e2e\specs\03.crud.spec.ts:41:3 › crud — runs › empty state shows when no runs exist 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('primary-list')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('primary-list')[22m
+
+
+      42 |     // In test env the filesystem runs dir won't exist, so empty state is expected
+      43 |     const primaryList = page.getByTestId(APP_CONTRACT.testIds.primaryList)
+    > 44 |     await expect(primaryList).toBeVisible()
+         |                               ^
+      45 |     // Either empty state or run items — both are valid
+      46 |     const hasEmpty = await page.getByTestId(APP_CONTRACT.testIds.emptyState).isVisible()
+      47 |     const hasItems = await page.getByTestId('run-item').count()
+        at C:\DEV\denovoai\e2e\specs\03.crud.spec.ts:44:31
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\03.crud-crud-—-runs-empty-state-shows-when-no-runs-exist-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\03.crud-crud-—-runs-empty-state-shows-when-no-runs-exist-chromium\error-context.md
+
+  22) [chromium] › e2e\specs\04.forms.spec.ts:9:3 › forms › create-run-form is present ─────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('create-run-form')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('create-run-form')[22m
+
+
+       8 |
+       9 |   test('create-run-form is present', async ({ page }) => {
+    > 10 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createRunForm)).toBeVisible()
+         |                                                                        ^
+      11 |   })
+      12 |
+      13 |   test('run-prompt-input accepts text', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:10:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-create-run-form-is-present-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-create-run-form-is-present-chromium\error-context.md
+
+  23) [chromium] › e2e\specs\04.forms.spec.ts:13:3 › forms › run-prompt-input accepts text ─────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('run-prompt-input')[22m
+
+
+      13 |   test('run-prompt-input accepts text', async ({ page }) => {
+      14 |     const input = page.getByTestId(APP_CONTRACT.testIds.runPromptInput)
+    > 15 |     await input.fill('Test prompt for a todo app')
+         |                 ^
+      16 |     await expect(input).toHaveValue('Test prompt for a todo app')
+      17 |   })
+      18 |
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:15:17
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-run-prompt-input-accepts-text-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-run-prompt-input-accepts-text-chromium\error-context.md
+
+  24) [chromium] › e2e\specs\04.forms.spec.ts:19:3 › forms › submit button is disabled when prompt is empty 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeDisabled[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('create-primary')
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeDisabled" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('create-primary')[22m
+
+
+      18 |
+      19 |   test('submit button is disabled when prompt is empty', async ({ page }) => {
+    > 20 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeDisabled()
+         |                                                                        ^
+      21 |   })
+      22 |
+      23 |   test('submit button is enabled when prompt is filled', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:20:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-submit-butt-68a5f-sabled-when-prompt-is-empty-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-submit-butt-68a5f-sabled-when-prompt-is-empty-chromium\error-context.md
+
+  25) [chromium] › e2e\specs\04.forms.spec.ts:23:3 › forms › submit button is enabled when prompt is filled 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('run-prompt-input')[22m
+
+
+      22 |
+      23 |   test('submit button is enabled when prompt is filled', async ({ page }) => {
+    > 24 |     await page.getByTestId(APP_CONTRACT.testIds.runPromptInput).fill('Build a task app')
+         |                                                                 ^
+      25 |     await expect(page.getByTestId(APP_CONTRACT.testIds.createPrimary)).toBeEnabled()
+      26 |   })
+      27 |
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:24:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-submit-butt-9e607-abled-when-prompt-is-filled-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-submit-butt-9e607-abled-when-prompt-is-filled-chromium\error-context.md
+
+  26) [chromium] › e2e\specs\04.forms.spec.ts:28:3 › forms › prompt input has correct placeholder ──
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveAttribute[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('run-prompt-input')
+    Expected pattern: [32m/describe/i[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toHaveAttribute" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('run-prompt-input')[22m
+
+
+      28 |   test('prompt input has correct placeholder', async ({ page }) => {
+      29 |     const input = page.getByTestId(APP_CONTRACT.testIds.runPromptInput)
+    > 30 |     await expect(input).toHaveAttribute('placeholder', /describe/i)
+         |                         ^
+      31 |   })
+      32 |
+      33 |   test('form has correct aria label on input', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:30:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-prompt-input-has-correct-placeholder-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-prompt-input-has-correct-placeholder-chromium\error-context.md
+
+  27) [chromium] › e2e\specs\04.forms.spec.ts:33:3 › forms › form has correct aria label on input ──
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByLabel('Run prompt')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByLabel('Run prompt')[22m
+
+
+      33 |   test('form has correct aria label on input', async ({ page }) => {
+      34 |     const input = page.getByLabel('Run prompt')
+    > 35 |     await expect(input).toBeVisible()
+         |                         ^
+      36 |   })
+      37 |
+      38 |   test('search input has correct aria label', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:35:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-form-has-correct-aria-label-on-input-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-form-has-correct-aria-label-on-input-chromium\error-context.md
+
+  28) [chromium] › e2e\specs\04.forms.spec.ts:38:3 › forms › search input has correct aria label ───
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByLabel('Search runs')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByLabel('Search runs')[22m
+
+
+      38 |   test('search input has correct aria label', async ({ page }) => {
+      39 |     const input = page.getByLabel('Search runs')
+    > 40 |     await expect(input).toBeVisible()
+         |                         ^
+      41 |   })
+      42 | })
+      43 |
+        at C:\DEV\denovoai\e2e\specs\04.forms.spec.ts:40:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\04.forms-forms-search-input-has-correct-aria-label-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\04.forms-forms-search-input-has-correct-aria-label-chromium\error-context.md
+
+  29) [chromium] › e2e\specs\08.console.spec.ts:16:3 › console + network health › no uncaught JS errors on home load 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m1[39m
+    Received array:  [31m["Module not found: Can't resolve '@/lib/supabase/client'[39m
+    [31m  1 | import React, { useEffect, useState } from 'react'[39m
+    [31m  2 | import Head from 'next/head'[39m
+    [31m> 3 | import { createClient } from '@/lib/supabase/client'[39m
+    [31m  4 | import type { User } from '@supabase/supabase-js'[39m
+    [31m  5 |[39m
+    [31m  6 | type Run = {·[39m
+    [31mhttps://nextjs.org/docs/messages/module-not-found[39m
+    [31m"][39m
+
+      21 |     await page.goto(APP_CONTRACT.routes.root)
+      22 |     await page.waitForLoadState('networkidle')
+    > 23 |     expect(errors).toHaveLength(0)
+         |                    ^
+      24 |   })
+      25 |
+      26 |   test('no 500 responses on home load', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\08.console.spec.ts:23:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\08.console-console-network-86995-ught-JS-errors-on-home-load-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\08.console-console-network-86995-ught-JS-errors-on-home-load-chromium\error-context.md
+
+  30) [chromium] › e2e\specs\08.console.spec.ts:26:3 › console + network health › no 500 responses on home load 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m1[39m
+    Received array:  [31m["500 http://localhost:3004/"][39m
+
+      33 |     await page.goto(APP_CONTRACT.routes.root)
+      34 |     await page.waitForLoadState('networkidle')
+    > 35 |     expect(failures).toHaveLength(0)
+         |                      ^
+      36 |   })
+      37 |
+      38 |   test('runs API returns 200', async ({ page }) => {
+        at C:\DEV\denovoai\e2e\specs\08.console.spec.ts:35:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\08.console-console-network-f266d--500-responses-on-home-load-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\08.console-console-network-f266d--500-responses-on-home-load-chromium\error-context.md
+
+  31) [chromium] › e2e\specs\08.console.spec.ts:38:3 › console + network health › runs API returns 200 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m500[39m
+
+      38 |   test('runs API returns 200', async ({ page }) => {
+      39 |     const res = await page.request.get('/api/runs')
+    > 40 |     expect(res.status()).toBe(200)
+         |                          ^
+      41 |     const body = await res.json()
+      42 |     expect(body).toHaveProperty('runs')
+      43 |     expect(Array.isArray(body.runs)).toBe(true)
+        at C:\DEV\denovoai\e2e\specs\08.console.spec.ts:40:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\08.console-console-network-health-runs-API-returns-200-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31 failed
+    [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 ───────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title ──────────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present ─────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible ─────────────────
+    [chromium] › e2e\specs\02.dashboard.spec.ts:9:3 › dashboard / home › home page renders with app-root 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:13:3 › dashboard / home › feature cards section is visible 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:17:3 › dashboard / home › AI Development card is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:21:3 › dashboard / home › Smart Templates card is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:25:3 › dashboard / home › Orchestration card is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:29:3 › dashboard / home › Module Engine card is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:33:3 › dashboard / home › primary-list section renders 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:37:3 › dashboard / home › create-primary button is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:41:3 › dashboard / home › search-primary input is present 
+    [chromium] › e2e\specs\02.dashboard.spec.ts:45:3 › dashboard / home › Recent Runs heading is visible 
+    [chromium] › e2e\specs\03.crud.spec.ts:9:3 › crud — runs › primary-list is present on home ─────
+    [chromium] › e2e\specs\03.crud.spec.ts:13:3 › crud — runs › create-primary button is visible ───
+    [chromium] › e2e\specs\03.crud.spec.ts:17:3 › crud — runs › create-primary is disabled when prompt is empty 
+    [chromium] › e2e\specs\03.crud.spec.ts:21:3 › crud — runs › create-primary enables when prompt is filled 
+    [chromium] › e2e\specs\03.crud.spec.ts:26:3 › crud — runs › prompt input clears after filling and clearing 
+    [chromium] › e2e\specs\03.crud.spec.ts:34:3 › crud — runs › search-primary filters the run list 
+    [chromium] › e2e\specs\03.crud.spec.ts:41:3 › crud — runs › empty state shows when no runs exist 
+    [chromium] › e2e\specs\04.forms.spec.ts:9:3 › forms › create-run-form is present ───────────────
+    [chromium] › e2e\specs\04.forms.spec.ts:13:3 › forms › run-prompt-input accepts text ───────────
+    [chromium] › e2e\specs\04.forms.spec.ts:19:3 › forms › submit button is disabled when prompt is empty 
+    [chromium] › e2e\specs\04.forms.spec.ts:23:3 › forms › submit button is enabled when prompt is filled 
+    [chromium] › e2e\specs\04.forms.spec.ts:28:3 › forms › prompt input has correct placeholder ────
+    [chromium] › e2e\specs\04.forms.spec.ts:33:3 › forms › form has correct aria label on input ────
+    [chromium] › e2e\specs\04.forms.spec.ts:38:3 › forms › search input has correct aria label ─────
+    [chromium] › e2e\specs\08.console.spec.ts:16:3 › console + network health › no uncaught JS errors on home load 
+    [chromium] › e2e\specs\08.console.spec.ts:26:3 › console + network health › no 500 responses on home load 
+    [chromium] › e2e\specs\08.console.spec.ts:38:3 › console + network health › runs API returns 200 
+  20 skipped

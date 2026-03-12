@@ -1,0 +1,89 @@
+ℹ️  Global setup: no E2E credentials — auth tests will be skipped
+
+Running 4 tests using 1 worker
+
+  x  1 [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 (40.0s)
+  x  2 [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title (40.0s)
+  x  3 [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present (40.0s)
+  x  4 [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible (19.4s)
+
+
+  1) [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 ──────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+    Call log:
+    [2m  - navigating to "http://localhost:3004/", waiting until "load"[22m
+
+
+      4 | test.describe('smoke', () => {
+      5 |   test('app loads with 200', async ({ page }) => {
+    > 6 |     const res = await page.goto(APP_CONTRACT.routes.root)
+        |                            ^
+      7 |     expect(res?.status()).toBe(200)
+      8 |   })
+      9 |
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:6:28
+
+  2) [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title ─────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+    Call log:
+    [2m  - navigating to "http://localhost:3004/", waiting until "load"[22m
+
+
+       9 |
+      10 |   test('page has title', async ({ page }) => {
+    > 11 |     await page.goto(APP_CONTRACT.routes.root)
+         |                ^
+      12 |     const title = await page.title()
+      13 |     expect(title.length).toBeGreaterThan(0)
+      14 |   })
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:11:16
+
+  3) [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present ────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+    Call log:
+    [2m  - navigating to "http://localhost:3004/", waiting until "load"[22m
+
+
+      15 |
+      16 |   test('app-root is present', async ({ page }) => {
+    > 17 |     await page.goto(APP_CONTRACT.routes.root)
+         |                ^
+      18 |     await expect(page.getByTestId(APP_CONTRACT.testIds.appRoot)).toBeVisible()
+      19 |   })
+      20 |
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:17:16
+
+  4) [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible ────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_RESET at http://localhost:3004/
+    Call log:
+    [2m  - navigating to "http://localhost:3004/", waiting until "load"[22m
+
+
+      20 |
+      21 |   test('hero heading is visible', async ({ page }) => {
+    > 22 |     await page.goto(APP_CONTRACT.routes.root)
+         |                ^
+      23 |     await expect(page.getByTestId(APP_CONTRACT.testIds.heroHeading)).toBeVisible()
+      24 |     await expect(page.getByTestId(APP_CONTRACT.testIds.heroHeading)).toContainText('Denovo AI')
+      25 |   })
+        at C:\DEV\denovoai\e2e\specs\00.smoke.spec.ts:22:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00.smoke-smoke-hero-heading-is-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium] › e2e\specs\00.smoke.spec.ts:5:3 › smoke › app loads with 200 ───────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:10:3 › smoke › page has title ──────────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:16:3 › smoke › app-root is present ─────────────────────
+    [chromium] › e2e\specs\00.smoke.spec.ts:21:3 › smoke › hero heading is visible ─────────────────
