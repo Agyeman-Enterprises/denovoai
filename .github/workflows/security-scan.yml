@@ -1,0 +1,19 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays 6am UTC (4pm Guam)
+
+jobs:
+  security:
+    uses: Agyeman-Enterprises/.github/.github/workflows/security-reusable.yml@main
+    with:
+      has_python: false
+      has_npm: true
+      npm_workspaces: "."
+      semgrep_config: "p/typescript p/react p/nextjs p/secrets p/owasp-top-ten"
+    secrets: inherit
