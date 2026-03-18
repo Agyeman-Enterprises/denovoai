@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@stripe/stripe-js": "^8.9.0",
+    "@stripe/stripe-js": "^8.10.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.98.0",
     "@types/node": "^20.0.0",
