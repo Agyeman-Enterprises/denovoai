@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Pacific/Guam"
+    open-pull-requests-limit: 5
+    labels: ["security", "dependencies"]
+    commit-message:
+      prefix: "fix(deps)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "chore(actions)"
