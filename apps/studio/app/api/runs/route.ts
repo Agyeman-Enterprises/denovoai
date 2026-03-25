@@ -178,7 +178,7 @@ async function runPipeline(runId: string, prompt: string) {
 export async function GET() {
   const supabase = await getUserClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ runs: [] }, { status: 401 })
+  if (!user) return NextResponse.json({ runs: [] })
 
   const { data } = await supabase
     .schema('denovo')
