@@ -1,39 +1,30 @@
-import { execSync, spawnSync } from 'node:child_process'
-import path from 'node:path'
 import fs from 'node:fs'
+import path from 'node:path'
 
 /**
- * Deploy generated workspace to Vercel.
- * All shell arguments come from process.env (system-controlled), never from user input.
- * The app slug is sanitized before writing to package.json (filesystem only, not shell).
+ * Deploy generated workspace to Vercel via REST API v13.
+ * Uploads files directly — no Vercel CLI, no child_process, no persistent filesystem needed.
  */
 
-const DEPLOY_ENV_KEYS = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'STRIPE_SECRET_KEY',
-  'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
-  'STRIPE_WEBHOOK_SECRET',
-  'STRIPE_PRICE_PRO_MONTHLY',
-  'NEXT_PUBLIC_APP_URL',
-]
-
-function setVercelEnvVars(workspaceDir, token, scope) {
-  // token and scope come from process.env — system-controlled, not user input
-  for (const key of DEPLOY_ENV_KEYS) {
-    const val = process.env[key] || ''
-    if (!val) continue
-    const args = ['env', 'add', key, 'production', '--token', token, '--force']
-    if (scope) args.push('--scope', scope)
-    try {
-      spawnSync('vercel', args, {
-        cwd: workspaceDir,
-        input: val,
-        stdio: ['pipe', 'ignore', 'ignore'],
+function collectFiles(dir, root) {
+  const files = []
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    const rel = path.relative(root, full).replace(/\\/g, '/')
+    if (entry.isDirectory()) {
+      files.push(...collectFiles(full, root))
+    } else {
+      const content = fs.readFileSync(full)
+      const isBinary = /\.(png|jpg|jpeg|gif|ico|woff2?|ttf|eot)$/i.test(rel)
+      files.push({
+        file: rel,
+        data: isBinary ? content.toString('base64') : content.toString('utf-8'),
+        encoding: isBinary ? 'base64' : 'utf-8',
       })
-    } catch {}
+    }
   }
+  return files
 }
 
 export async function deployToVercel(workspaceDir, productSpec) {
@@ -43,56 +34,65 @@ export async function deployToVercel(workspaceDir, productSpec) {
     return { deployed: false, url: null, reason: 'VERCEL_TOKEN not set' }
   }
 
-  const scope = process.env.VERCEL_SCOPE || ''
+  const rawSlug = typeof productSpec?.slug === 'string' ? productSpec.slug : ''
+  const safeSlug = rawSlug.replace(/[^a-z0-9-]/gi, '-').slice(0, 52) || 'denovo-app'
+  const appId = productSpec?.id || `app-${Date.now()}`
 
   try {
-    // Write sanitized slug to package.json — filesystem write, not shell injection
-    const rawSlug = typeof productSpec?.slug === 'string' ? productSpec.slug : ''
-    const safeSlug = rawSlug.replace(/[^a-z0-9-]/gi, '-').slice(0, 52) || 'denovo-app'
-    const pkgPath = path.join(workspaceDir, 'package.json')
-    if (fs.existsSync(pkgPath)) {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
-      pkg.name = safeSlug
-      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+    const files = collectFiles(workspaceDir, workspaceDir)
+    console.log(`[deployer] Uploading ${files.length} files for ${safeSlug}`)
+
+    const body = {
+      name: `denovo-${appId.slice(0, 12)}`,
+      files: files.map((f) => ({ file: f.file, data: f.data, encoding: f.encoding })),
+      projectSettings: { framework: 'nextjs' },
+      target: 'preview',
     }
 
-    // token and scope are from process.env — safe to use in execSync
-    const scopeArg = scope ? ` --scope ${scope}` : ''
+    const res = await fetch('https://api.vercel.com/v13/deployments', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
 
-    // Step 1: Link project (auto-creates Vercel project named after package.json#name)
-    console.log(`[deployer] Linking project: ${safeSlug}`)
-    try {
-      execSync(`vercel link --token ${token} --yes${scopeArg}`, {
-        cwd: workspaceDir, stdio: 'pipe', timeout: 60000,
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(`Vercel deploy failed ${res.status}: ${err.slice(0, 300)}`)
+    }
+
+    const deployment = await res.json()
+    const deployId = deployment.id
+    let previewUrl = `https://${deployment.url}`
+    console.log(`[deployer] Deployment created: ${deployId} — polling for ready state...`)
+
+    // Poll until ready (up to 3 minutes)
+    let attempts = 0
+    while (attempts < 36) {
+      await new Promise((r) => setTimeout(r, 5000))
+      const poll = await fetch(`https://api.vercel.com/v13/deployments/${deployId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-    } catch (e) {
-      console.warn('[deployer] link warning:', e.message?.slice(0, 100))
+      if (poll.ok) {
+        const d = await poll.json()
+        previewUrl = `https://${d.url}`
+        if (d.readyState === 'READY') {
+          console.log(`[deployer] Ready: ${previewUrl}`)
+          break
+        }
+        if (d.readyState === 'ERROR' || d.readyState === 'CANCELED') {
+          throw new Error(`Vercel deployment ${d.readyState}`)
+        }
+      }
+      attempts++
     }
 
-    // Step 2: Set env vars on the linked project
-    console.log('[deployer] Setting env vars...')
-    setVercelEnvVars(workspaceDir, token, scope)
-
-    // Step 3: Deploy to production
-    console.log('[deployer] Deploying...')
-    const stdout = execSync(`vercel --token ${token} --prod --yes${scopeArg}`, {
-      cwd: workspaceDir, stdio: 'pipe', timeout: 300000,
-    }).toString()
-
-    const urlMatch = stdout.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
-    const url = urlMatch ? urlMatch[0] : null
-    console.log(`[deployer] Deployed: ${url || 'no URL in output'}`)
-    return { deployed: !!url, url, stdout: stdout.slice(0, 500) }
+    return { deployed: true, url: previewUrl }
 
   } catch (err) {
-    const out = (err.stdout?.toString() || '') + (err.stderr?.toString() || '') + (err.message || '')
-    const urlMatch = out.match(/https:\/\/[a-z0-9-]+\.vercel\.app/)
-    if (urlMatch) {
-      console.log(`[deployer] Deployed (with warnings): ${urlMatch[0]}`)
-      return { deployed: true, url: urlMatch[0] }
-    }
-    const reason = out.slice(0, 400)
-    console.error('[deployer] Deploy failed:', reason.slice(0, 200))
-    return { deployed: false, url: null, reason }
+    console.error('[deployer] Deploy failed:', err.message?.slice(0, 200))
+    return { deployed: false, url: null, reason: err.message }
   }
 }
