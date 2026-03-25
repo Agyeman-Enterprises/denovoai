@@ -21,3 +21,4 @@ run-e2e.bat
 *.py  
 *.txt  
 server.err 
+.env.e2e

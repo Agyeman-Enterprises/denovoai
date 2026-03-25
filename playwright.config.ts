@@ -1,4 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
+import { config as loadEnv } from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+loadEnv({ path: resolve(__dirname, '.env.e2e'), override: false })
 
 const nodeExe = process.execPath
 const nextBin = 'C:\\DEV\\denovoai\\node_modules\\next\\dist\\bin\\next'

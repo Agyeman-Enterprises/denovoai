@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { stripe, STRIPE_PRICES } from '@/lib/stripe/client'
 
 export async function POST() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.STRIPE_SECRET_KEY) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_PRO_MONTHLY) {
     return NextResponse.json({ error: 'Billing not configured' }, { status: 503 })
   }
 

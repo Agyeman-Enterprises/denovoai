@@ -120,6 +120,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState('')
   const [user, setUser] = useState<User | null>(null)
   const [limitError, setLimitError] = useState(false)
+  const [subInfo, setSubInfo] = useState<{ plan: string; runCount: number; runLimit: number } | null>(null)
   const promptRef = useRef<HTMLTextAreaElement>(null)
   const supabase = createClient()
 
@@ -132,6 +133,7 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    fetch('/api/subscription').then(r => r.json()).then(setSubInfo).catch(() => {})
     fetchRuns()
     const interval = setInterval(fetchRuns, 4000)
     return () => clearInterval(interval)
@@ -185,17 +187,23 @@ export default function Home() {
               </span>
             )}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div data-testid="nav-user-menu" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{user.email?.[0].toUpperCase()}</span>
                 </div>
-                <button onClick={() => supabase.auth.signOut().then(() => window.location.reload())}
+                <span style={{ fontSize: 13, color: '#374151' }}>{user.email}</span>
+                <span style={{ fontSize: 12, color: '#6366f1', background: '#eef2ff', padding: '2px 8px', borderRadius: 20, fontWeight: 500 }}>
+                  {subInfo ? (subInfo.plan === 'pro' ? 'PRO' : `${subInfo.runCount}/${subInfo.runLimit} runs`) : '0/3 runs'}
+                </span>
+                <button
+                  data-testid="logout"
+                  onClick={() => supabase.auth.signOut().then(() => window.location.reload())}
                   style={{ fontSize: 13, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Sign out
                 </button>
               </div>
             ) : (
-              <Link href="/login" style={{ fontSize: 14, color: '#6366f1', fontWeight: 500, textDecoration: 'none' }}>Sign in</Link>
+              <Link data-testid="login-link" href="/login" style={{ fontSize: 14, color: '#6366f1', fontWeight: 500, textDecoration: 'none' }}>Sign in</Link>
             )}
           </div>
         </header>

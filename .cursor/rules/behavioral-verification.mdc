@@ -1,0 +1,46 @@
+---
+description: denovoai — behavioral verification; build/typecheck alone is not completion.
+alwaysApply: true
+---
+
+# Behavioral verification — denovoai
+
+This rule **overrides** “done” without proof. Typecheck/build **alone** is **not** completion.
+
+## Forbidden until proof is attached
+
+Words/phrases you **must not** use about your own change: **done**, **verified**, **working**, **complete**, **ready**, **fixed**, **shipped**, **should work**, **looks correct**.
+
+## Accepted proof (use what fits the change)
+
+1. **Browser** — running UI (snapshot/screenshot/automation) showing the behavior you changed.
+2. **E2E** — passing Playwright/Cypress (or project-defined E2E) covering that path, when the repo has it.
+3. **HTTP/API** — real status + body for changed routes or webhooks.
+4. **Tests** — unit/integration output only for **pure logic** with no user-visible surface; name the command and paste passing output.
+
+## Does **not** count
+
+- `npm run build` / `tsc` / lint clean alone  
+- Reading code and reasoning without execution  
+
+## Critical flows
+
+- App or service starts locally in the intended mode.
+- The exact user/API path you changed is exercised end-to-end.
+- No uncaught console errors on first load (for web UIs).
+- Domain note: AI generation flows; cost/latency-sensitive paths.
+
+## Commands & stack hints
+
+- **Tests:** `npm run test`
+- **Proof:** Use the project’s primary test or run command; for CLIs, paste stdout from a real invocation.
+
+## If you cannot verify
+
+Say: **“Code written but NOT VERIFIED.”** Then list numbered manual steps.
+
+## Agent duties
+
+- Add stable selectors (`data-testid`) when adding E2E.
+- Update tests when behavior changes.
+- One feature: implement → prove → then continue.
