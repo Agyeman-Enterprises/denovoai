@@ -2,7 +2,9 @@ node_modules
 pnpm-lock.yaml
 npm-lock.json
 yarn.lock
-runs/
+# Old filesystem pipeline output — NOT the API route directory
+/runs/
+apps/studio/pages/runs/
 .DS_Store
 dist/
 out/
