@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { createClient } from '@/lib/supabase/client'
 
@@ -64,7 +65,7 @@ export default function BillingPage() {
       }}>
         <span style={{ fontWeight: 700, fontSize: 16 }}>Denovo AI</span>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <a href="/" style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none' }}>← Studio</a>
+          <Link href="/" style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none' }}>← Studio</Link>
           <button
             data-testid="logout"
             onClick={handleLogout}

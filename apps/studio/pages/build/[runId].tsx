@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function BuildResultPage() {
   const [showDetails, setShowDetails] = useState(false)
@@ -9,8 +10,8 @@ export default function BuildResultPage() {
       <nav className="card" aria-label="Top navigation" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontWeight: 700 }}>DeNovo</div>
         <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-          <a href="/" className="view-link">Studio</a>
-          <a href="/" className="view-link">My Apps</a>
+          <Link href="/" className="view-link">Studio</Link>
+          <Link href="/" className="view-link">My Apps</Link>
           <a href="https://docs.denovoai.com" target="_blank" rel="noreferrer" className="view-link">Docs</a>
         </div>
       </nav>

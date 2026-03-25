@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -194,7 +195,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <a href="/login" style={{ fontSize: 14, color: '#6366f1', fontWeight: 500, textDecoration: 'none' }}>Sign in</a>
+              <Link href="/login" style={{ fontSize: 14, color: '#6366f1', fontWeight: 500, textDecoration: 'none' }}>Sign in</Link>
             )}
           </div>
         </header>
@@ -269,7 +270,7 @@ export default function Home() {
             </div>
             {limitError && (
               <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8, textAlign: 'center' }}>
-                Free plan limit reached. <a href="/billing" style={{ color: '#6366f1' }}>Upgrade to Pro</a>
+                Free plan limit reached. <Link href="/billing" style={{ color: '#6366f1' }}>Upgrade to Pro</Link>
               </p>
             )}
           </form>
