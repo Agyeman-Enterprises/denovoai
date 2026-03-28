@@ -56,9 +56,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-violet-400">${((item.price_cents as number) / 100).toFixed(2)}</p>
-                  {product?.product_type === "digital" && product?.download_url && (order.status === "paid" || order.status === "fulfilled") && (
+                  {product?.product_type === "digital" && !!(product?.download_url) && (order.status === "paid" || order.status === "fulfilled") ? (
                     <a href={`/api/downloads/${order.id}`} className="text-xs text-emerald-400 hover:text-emerald-300">Download</a>
-                  )}
+                  ) : null}
                 </div>
               </div>
             );

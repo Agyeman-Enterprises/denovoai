@@ -81,11 +81,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         <div className="flex items-start justify-between gap-8">
           <div className="flex-1">
             <h1 className="text-3xl font-bold">{product.title as string}</h1>
-            {product.category && (
+            {!!(product.category) ? (
               <span className="mt-3 inline-block rounded-md px-2 py-1 text-xs" style={{ background: "rgba(139,92,246,0.15)", color: "#A78BFA" }}>
                 {product.category as string}
               </span>
-            )}
+            ) : null}
           </div>
 
           <div className="shrink-0 rounded-xl p-6 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", minWidth: 200 }}>
@@ -106,17 +106,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {product.description && (
+        {!!(product.description) ? (
           <div className="mt-8">
             <p className="text-white/60 whitespace-pre-wrap">{product.description as string}</p>
           </div>
-        )}
+        ) : null}
 
-        {product.product_type === "digital" && (
+        {product.product_type === "digital" ? (
           <div className="mt-8 rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <p className="text-xs text-white/40">Digital download &mdash; delivered instantly after purchase.</p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                 }
                 <div className="p-4">
                   <h3 className="font-semibold text-sm">{p.title as string}</h3>
-                  {p.description && <p className="mt-1 text-xs text-white/40 line-clamp-2">{p.description as string}</p>}
+                  {!!(p.description) ? <p className="mt-1 text-xs text-white/40 line-clamp-2">{p.description as string}</p> : null}
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-sm font-bold text-violet-400">${((p.price_cents as number) / 100).toFixed(2)}</span>
                     {compare && compare > (p.price_cents as number) && (
