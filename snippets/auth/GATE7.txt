@@ -1,0 +1,73 @@
+DENOVO AUTH SNIPPET — GATE 7: BEHAVIORAL TEST
+===============================================
+Production-grade Supabase auth reference implementation.
+Three auth methods (magic link, Google OAuth, email/password),
+route protection via proxy.ts, protected dashboard.
+
+This file is read by RELEASE_GATE.txt Gate 7.
+Every check below must PASS before this snippet can be called done.
+
+===================================================================
+SECTION A: NAVIGATION — ALL ROUTES
+===================================================================
+
+  [ ] Landing page (/) opens → shows "Sign In" CTA
+  [ ] Login page (/auth/login) opens → shows all 3 auth methods
+  [ ] Dashboard (/dashboard) redirects to /auth/login when not authenticated
+  [ ] Health check (/api/health) returns 200 with JSON
+
+===================================================================
+SECTION B: AUTH FLOWS
+===================================================================
+
+  [ ] Magic link — enter email → "Check your email" message shown
+  [ ] Magic link — click link in email → redirected to /dashboard
+  [ ] Google OAuth — click "Continue with Google" → Google consent screen
+  [ ] Google OAuth — complete consent → redirected to /dashboard
+  [ ] Email/Password signup — enter email + password → "Check email to confirm"
+  [ ] Email/Password signin — enter existing credentials → lands on /dashboard
+  [ ] Password visibility toggle works (Show/Hide)
+
+===================================================================
+SECTION C: ROUTE PROTECTION (proxy.ts)
+===================================================================
+
+  [ ] Unauthenticated user visits /dashboard → redirected to /auth/login
+  [ ] Authenticated user visits /auth/login → redirected to /dashboard
+  [ ] Hard refresh on /dashboard while logged in → session persists
+
+===================================================================
+SECTION D: SIGN OUT
+===================================================================
+
+  [ ] Click "Sign Out" on dashboard → session cleared
+  [ ] After sign out → redirected to /auth/login
+  [ ] After sign out → /dashboard redirects to /auth/login
+
+===================================================================
+SECTION E: DASHBOARD DATA
+===================================================================
+
+  [ ] Dashboard shows user email
+  [ ] Dashboard shows user ID
+  [ ] Dashboard shows display_name from profiles table
+  [ ] Dashboard shows role from profiles table
+
+===================================================================
+SECTION F: THE MANDATORY PERSISTENCE TEST
+===================================================================
+
+  [ ] Sign in → land on dashboard → data shows
+  [ ] Navigate to / → navigate back to /dashboard → still logged in
+  [ ] Hard refresh browser → still logged in, data shows
+  [ ] Close browser tab → reopen → still logged in
+  [ ] Open incognito → /dashboard redirects to login (no session)
+
+===================================================================
+WHAT CLAUDE IS NOT ALLOWED TO SUBSTITUTE FOR THIS TEST
+===================================================================
+
+  - "tsc passed" → NOT A PRODUCT TEST
+  - "build succeeded" → NOT A PRODUCT TEST
+  - "component renders" → NOT A PRODUCT TEST
+  - Only the full end-to-end auth flow above counts as PASS.

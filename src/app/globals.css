@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a1a;
+  --background: #06060f;
   --foreground: #e4e4f0;
-  --card: #111127;
+  --card: #0f0f1e;
   --card-foreground: #e4e4f0;
-  --border: #1e1e3a;
-  --input: #1e1e3a;
+  --border: #1a1a35;
+  --input: #1a1a35;
   --primary: #8B5CF6;
   --primary-foreground: #ffffff;
-  --secondary: #1e1e3a;
+  --secondary: #151528;
   --secondary-foreground: #e4e4f0;
-  --muted: #16162e;
-  --muted-foreground: #8888aa;
+  --muted: #0c0c1a;
+  --muted-foreground: #7a7a9e;
   --accent: #8B5CF6;
   --destructive: #ef4444;
   --ring: #8B5CF6;
@@ -48,6 +48,7 @@
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -55,6 +56,31 @@ body {
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Section divider — gradient line */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+/* Card hover glow */
+.card-glow {
+  transition: all 0.3s ease;
+}
+.card-glow:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.06), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* CTA glow */
+.cta-glow {
+  transition: all 0.3s ease;
+}
+.cta-glow:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.35);
 }
 
 ::-webkit-scrollbar {
@@ -66,4 +92,9 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }

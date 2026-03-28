@@ -4,7 +4,11 @@
       "WebSearch",
       "WebFetch(domain:linear.app)",
       "WebFetch(domain:vercel.com)",
-      "WebFetch(domain:www.raycast.com)"
+      "WebFetch(domain:www.raycast.com)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_run_code"
     ]
   }
 }
