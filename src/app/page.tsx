@@ -143,6 +143,22 @@ function Section({ children, id, className = "" }: { children: React.ReactNode; 
   return <section id={id} className={`px-6 sm:px-8 lg:px-12 py-24 sm:py-32 ${className}`}>{children}</section>;
 }
 
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between p-5 text-left">
+        <span className="text-sm font-medium text-white/80">{question}</span>
+        <span className="text-white/25 shrink-0 ml-4" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>&#9660;</span>
+      </button>
+      <div style={{ maxHeight: open ? "300px" : "0", overflow: "hidden", transition: "max-height 0.3s ease" }}>
+        <p className="px-5 pb-5 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{answer}</p>
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ──────────────────────────────────────── */
 export default function LandingPage() {
   const [annual, setAnnual] = useState(false);
@@ -320,6 +336,7 @@ export default function LandingPage() {
               {/* Launch */}
               <Reveal delay={150}>
                 <div className="rounded-2xl p-8" style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 0 40px rgba(139,92,246,0.05)" }}>
+                  <span className="mb-2 inline-block w-fit rounded-full px-3 py-1 text-[10px] font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa" }}>MOST POPULAR</span>
                   <h3 className="text-xl font-bold">DeNovo Launch</h3>
                   <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>We host and run it for you.</p>
                   <p className="mt-4 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Everything in Build, plus:</p>
@@ -377,7 +394,7 @@ export default function LandingPage() {
                 return (
                   <Reveal key={p.name} delay={i * 80}>
                     <div className="card-glow flex flex-col rounded-2xl p-6" style={p.best ? { background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.25)" } : { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                      {p.best && <span className="mb-3 inline-block w-fit rounded-full px-3 py-1 text-[10px] font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa" }}>Best Value</span>}
+                      {p.best && <span className="mb-3 inline-block w-fit rounded-full px-3 py-1 text-[10px] font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa" }}>MOST POPULAR</span>}
                       <h3 className="text-lg font-semibold">{p.name}</h3>
                       <p className="mt-3"><span className="text-3xl font-bold">${price.toLocaleString()}</span><span className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>/mo</span></p>
                       <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{p.credits}</p>
@@ -399,17 +416,47 @@ export default function LandingPage() {
           </div>
         </Section>
 
+        {/* PRICING NOTES */}
+        <div className="px-6 sm:px-8 pb-12">
+          <div className="mx-auto max-w-3xl">
+            <Reveal>
+              <h3 className="text-sm font-semibold text-center mb-6" style={{ color: "rgba(255,255,255,0.5)" }}>Pricing Notes</h3>
+              <div className="space-y-4 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
+                <p><span className="font-medium text-white/50">Build</span> — Build includes code generation and source code delivery. Ongoing hosting, communications, infrastructure usage, and third-party service costs are not included unless explicitly stated.</p>
+                <p><span className="font-medium text-white/50">Launch</span> — Launch includes standard hosting, monitoring, backups, and routine platform operations for ordinary commercial workloads. Usage-based services such as email, SMS, storage, bandwidth, webhooks, and certain third-party integrations may be quota-limited, customer-supplied, or billed separately.</p>
+                <p><span className="font-medium text-white/50">Compliance</span> — Standard plans are not intended for regulated healthcare, financial, insurance, money transmission, or other high-compliance workloads unless explicitly contracted.</p>
+                <p><span className="font-medium text-white/50">Ownership</span> — Build includes source code delivery. Domains, payment accounts, and certain third-party provider accounts may be customer-owned depending on plan configuration.</p>
+                <p><span className="font-medium text-white/50">Platform Protection</span> — DeNovo may apply quotas, throttles, suspensions, or plan changes where usage creates abnormal cost, abuse risk, reputational harm, or compliance exposure.</p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+
+        {/* ADD-ONS */}
+        <div className="px-6 sm:px-8 pb-16">
+          <div className="mx-auto max-w-3xl">
+            <Reveal>
+              <h3 className="text-sm font-semibold text-center mb-6" style={{ color: "rgba(255,255,255,0.5)" }}>Available Add-Ons</h3>
+              <div className="flex flex-wrap justify-center gap-2">
+                {["Managed Email", "Managed SMS", "Extra Storage", "Extra Bandwidth", "Advanced Backups", "Premium Monitoring & SLA", "Dedicated Environment", "Compliance Pack", "Integration Pack", "White-Glove Launch Setup"].map(a => (
+                  <span key={a} className="rounded-lg px-3 py-1.5 text-xs" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>{a}</span>
+                ))}
+              </div>
+              <p className="mt-4 text-center text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>Some add-ons are usage-based, quota-limited, or subject to custom scope and pricing.</p>
+            </Reveal>
+          </div>
+        </div>
+
+        <Divider />
+
         {/* ═══ FAQ ═══ */}
-        <div className="px-6 sm:px-8 pb-24">
+        <div id="faq" className="px-6 sm:px-8 pb-24">
           <div className="mx-auto max-w-2xl">
             <Reveal><h3 className="text-xl font-bold text-center mb-8">Pricing FAQ</h3></Reveal>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {FAQS.map(([q, a], i) => (
-                <Reveal key={i} delay={i * 60}>
-                  <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <p className="text-sm font-medium">{q}</p>
-                    <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{a}</p>
-                  </div>
+                <Reveal key={i} delay={i * 40}>
+                  <FaqItem question={q} answer={a} />
                 </Reveal>
               ))}
             </div>
@@ -528,7 +575,7 @@ export default function LandingPage() {
               {[
                 { h: "Product", links: [["Build", "/auth/login"], ["Launch", "/auth/login"], ["Templates", "#templates"], ["Pricing", "#pricing"]] },
                 { h: "Company", links: [["About"], ["Blog"], ["Changelog"]] },
-                { h: "Legal", links: [["Privacy"], ["Terms"], ["Security"]] },
+                { h: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["Security", "/security"], ["Acceptable Use", "/acceptable-use"]] },
                 { h: "Support", links: [["Docs"], ["Contact"], ["Status"]] },
               ].map(col => (
                 <div key={col.h}>
@@ -543,7 +590,15 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-12 flex items-center justify-between pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            {/* Policy bar */}
+            <div className="mt-10 rounded-xl p-4 space-y-1.5 text-[10px] leading-relaxed" style={{ background: "rgba(255,255,255,0.015)", color: "rgba(255,255,255,0.18)" }}>
+              <p>Email, SMS, storage, bandwidth, and certain integrations may be billed separately or require customer-supplied providers.</p>
+              <p>Standard plans are not intended for regulated healthcare, financial, or other high-compliance workloads unless explicitly contracted.</p>
+              <p>Build includes source code delivery. Domains, payment accounts, and certain provider accounts may be customer-owned depending on plan configuration.</p>
+              <p>DeNovo may apply quotas or plan changes where usage creates abnormal cost, abuse risk, or compliance exposure.</p>
+            </div>
+
+            <div className="mt-8 flex items-center justify-between pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "#8B5CF6" }}>
                   <span className="text-[10px] font-bold text-white">D</span>

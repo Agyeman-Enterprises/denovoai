@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import type { User } from "@supabase/supabase-js";
 
 export function Navbar() {
@@ -26,41 +25,41 @@ export function Navbar() {
     router.push("/");
   };
 
-  const isActive = (path: string) => pathname === path;
-
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(10,10,15,0.85)" }}>
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-white">D</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "#8B5CF6" }}>
+              <span className="text-[10px] font-bold text-white">D</span>
             </div>
-            <span className="text-lg font-bold">DeNovo</span>
+            <span className="text-base font-bold text-white">DeNovo</span>
           </Link>
 
+          {/* Public nav */}
+          {!user && (
+            <div className="hidden items-center gap-1 sm:flex">
+              {[
+                { label: "Build", href: "/#pricing" },
+                { label: "Launch", href: "/#pricing" },
+                { label: "Templates", href: "/#templates" },
+                { label: "Pricing", href: "/#pricing" },
+                { label: "FAQ", href: "/#faq" },
+              ].map(n => (
+                <Link key={n.label} href={n.href} className="rounded-lg px-3 py-1.5 text-xs text-white/40 transition-colors hover:text-white/70">{n.label}</Link>
+              ))}
+            </div>
+          )}
+
+          {/* Authenticated nav */}
           {user && (
             <div className="hidden items-center gap-1 sm:flex">
-              <Link
-                href="/studio"
-                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isActive("/studio")
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Studio
-              </Link>
-              <Link
-                href="/dashboard"
-                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isActive("/dashboard")
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Dashboard
-              </Link>
+              {[
+                { label: "Studio", href: "/studio" },
+                { label: "Dashboard", href: "/dashboard" },
+              ].map(n => (
+                <Link key={n.label} href={n.href} className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${pathname === n.href ? "text-white bg-white/5" : "text-white/40 hover:text-white/70"}`}>{n.label}</Link>
+              ))}
             </div>
           )}
         </div>
@@ -68,24 +67,13 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {!user ? (
             <>
-              <Link href="/pricing">
-                <Button variant="ghost" size="sm">Pricing</Button>
-              </Link>
-              <Link href="/auth/login">
-                <Button size="sm">Sign In</Button>
-              </Link>
+              <Link href="/auth/login" className="hidden text-xs text-white/30 hover:text-white/50 transition-colors sm:block">Sign In</Link>
+              <Link href="/auth/login" className="inline-flex h-8 items-center rounded-lg px-4 text-xs font-semibold text-white" style={{ background: "#8B5CF6" }}>Start Building</Link>
             </>
           ) : (
             <>
-              <Link href="/studio">
-                <Button size="sm">New App</Button>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Sign Out
-              </button>
+              <Link href="/studio" className="inline-flex h-8 items-center rounded-lg px-4 text-xs font-semibold text-white" style={{ background: "#8B5CF6" }}>New App</Link>
+              <button onClick={handleLogout} className="text-xs text-white/30 hover:text-white/50 transition-colors">Sign Out</button>
             </>
           )}
         </div>
