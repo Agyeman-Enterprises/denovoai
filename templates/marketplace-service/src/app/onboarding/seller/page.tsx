@@ -16,17 +16,17 @@ export default function SellerOnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/auth/login"); return; }
 
-      const { data: seller } = await supabase
-        .from("seller_profiles")
-        .select("stripe_onboarded, stripe_charges_enabled, stripe_payouts_enabled")
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("stripe_onboarded")
         .eq("id", user.id)
         .single();
 
-      if (seller) {
+      if (profile) {
         setStatus({
-          onboarded: seller.stripe_onboarded || false,
-          charges: seller.stripe_charges_enabled || false,
-          payouts: seller.stripe_payouts_enabled || false,
+          onboarded: profile.stripe_onboarded || false,
+          charges: profile.stripe_onboarded || false,
+          payouts: profile.stripe_onboarded || false,
         });
       }
     }
@@ -42,7 +42,7 @@ export default function SellerOnboardingPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#06060f] px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0A0A0F] px-4">
       <div className="w-full max-w-md rounded-2xl p-8" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
         <h1 className="text-2xl font-bold text-white">Become a Seller</h1>
         <p className="mt-2 text-sm text-white/40">Connect your Stripe account to receive payments.</p>

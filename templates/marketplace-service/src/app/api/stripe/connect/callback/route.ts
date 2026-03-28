@@ -7,21 +7,18 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/auth/login", request.url));
 
-  const { data: seller } = await supabase
-    .from("seller_profiles")
+  const { data: profile } = await supabase
+    .from("profiles")
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();
 
-  if (seller?.stripe_account_id) {
-    const account = await stripe.accounts.retrieve(seller.stripe_account_id);
+  if (profile?.stripe_account_id) {
+    const account = await stripe.accounts.retrieve(profile.stripe_account_id);
     await supabase
-      .from("seller_profiles")
+      .from("profiles")
       .update({
         stripe_onboarded: account.details_submitted,
-        stripe_charges_enabled: account.charges_enabled,
-        stripe_payouts_enabled: account.payouts_enabled,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
   }

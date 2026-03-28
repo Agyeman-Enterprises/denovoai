@@ -7,13 +7,13 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: seller } = await supabase
-    .from("seller_profiles")
+  const { data: profile } = await supabase
+    .from("profiles")
     .select("stripe_account_id")
     .eq("id", user.id)
     .single();
 
-  let accountId = seller?.stripe_account_id;
+  let accountId = profile?.stripe_account_id;
 
   if (!accountId) {
     const account = await stripe.accounts.create({
@@ -23,10 +23,10 @@ export async function POST() {
     });
     accountId = account.id;
 
-    await supabase.from("seller_profiles").upsert({
-      id: user.id,
-      stripe_account_id: accountId,
-    });
+    await supabase
+      .from("profiles")
+      .update({ stripe_account_id: accountId })
+      .eq("id", user.id);
   }
 
   const accountLink = await stripe.accountLinks.create({
