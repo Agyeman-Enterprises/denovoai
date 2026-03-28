@@ -90,6 +90,25 @@ export async function POST(request: Request) {
       }
       break;
     }
+
+    // Stripe Connect — seller account status updates
+    case "account.updated": {
+      const account = event.data.object as unknown as Record<string, unknown>;
+      const metadata = account.metadata as Record<string, string> | undefined;
+      const sellerUserId = metadata?.supabase_user_id;
+      if (sellerUserId) {
+        await supabase
+          .from("seller_profiles")
+          .update({
+            stripe_onboarded: account.details_submitted as boolean,
+            stripe_charges_enabled: account.charges_enabled as boolean,
+            stripe_payouts_enabled: account.payouts_enabled as boolean,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", sellerUserId);
+      }
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });
