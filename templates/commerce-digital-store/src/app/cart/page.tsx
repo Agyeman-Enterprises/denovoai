@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 interface CartItem { productId: string; quantity: number; priceCents: number; title: string }
@@ -13,10 +13,11 @@ function setCart(items: CartItem[]) {
 }
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    return getCart();
+  });
   const [checking, setChecking] = useState(false);
-
-  useEffect(() => { setItems(getCart()); }, []);
 
   const updateQty = (productId: string, delta: number) => {
     const updated = items.map(i => i.productId === productId ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i);

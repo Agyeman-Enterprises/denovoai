@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,19 +18,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [added, setAdded] = useState(false);
   const supabase = createClient();
 
-  const load = useCallback(async () => {
-    const { id } = await params;
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .eq("id", id)
-      .eq("status", "active")
-      .single();
-    setProduct(data);
-    setLoading(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const { id } = await params;
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .eq("status", "active")
+        .single();
+      if (!cancelled) {
+        setProduct(data);
+        setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
   }, [params, supabase]);
-
-  useEffect(() => { load(); }, [load]);
 
   const addToCart = () => {
     if (!product) return;
