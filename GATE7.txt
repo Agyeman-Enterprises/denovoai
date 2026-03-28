@@ -1,0 +1,117 @@
+STRUTHRADIO — GATE 7: PRODUCT-SPECIFIC BEHAVIORAL TEST
+=====================================================
+StruthRadio is an AI radio platform with music generation and broadcasting.
+Verification must center on the BROADCASTING WORKFLOW, not static build health.
+
+This file is read by RELEASE_GATE.txt Gate 7.
+Every check below must PASS before StruthRadio can be called done.
+
+===================================================================
+SECTION A: NAVIGATION — ALL TOP-LEVEL ROUTES
+===================================================================
+
+  [ ] Landing page opens           → readySelector: main present
+  [ ] Dashboard opens              → readySelector: main present
+  [ ] AI Studio opens              → readySelector: main present
+  [ ] AI DJ opens                  → readySelector: main present
+  [ ] Voice Lab opens              → readySelector: main present
+  [ ] Library opens                → readySelector: main present
+  [ ] Schedule opens               → readySelector: main present
+  [ ] Wallet opens                 → readySelector: main present
+  [ ] Upload opens                 → readySelector: main present
+  [ ] Onboarding opens             → readySelector: main present
+
+===================================================================
+SECTION B: STATION CRUD
+===================================================================
+
+  [ ] Create new station works
+  [ ] Station list renders with real data
+  [ ] Edit station metadata (name, genre, description)
+  [ ] Delete station works (with confirmation)
+  [ ] Station data persists in Supabase
+
+===================================================================
+SECTION C: SCHEDULE BUILDER
+===================================================================
+
+  [ ] Schedule view renders time slots
+  [ ] Add song/segment to schedule works
+  [ ] Remove song/segment from schedule works
+  [ ] Reorder schedule items works
+  [ ] Schedule saves to database
+
+===================================================================
+SECTION D: MUSIC GENERATION (core value prop)
+===================================================================
+
+  [ ] AI Studio accepts generation parameters
+  [ ] Music generation produces audio output
+  [ ] Generated audio is playable in browser
+  [ ] Generated song saves to library
+  [ ] Song metadata (title, genre, duration) is captured
+
+===================================================================
+SECTION E: TTS / VOICE
+===================================================================
+
+  [ ] Voice Lab accepts text input
+  [ ] TTS generates audio from text (ElevenLabs)
+  [ ] Generated voice clip is playable
+  [ ] Voice clips can be added to schedule
+
+===================================================================
+SECTION F: BROADCAST
+===================================================================
+
+  [ ] Broadcast start button initiates stream
+  [ ] Broadcast stop button ends stream
+  [ ] Broadcast status indicator shows live/offline
+  [ ] Listener stream URL is accessible
+  [ ] Listener can hear audio from the stream (Icecast/socket)
+  [ ] Scheduled content plays in sequence during broadcast
+
+===================================================================
+SECTION G: LIBRARY MANAGEMENT
+===================================================================
+
+  [ ] Library shows all songs/clips
+  [ ] Upload music file works
+  [ ] Song metadata is editable
+  [ ] Delete song works
+  [ ] Filter/search library works
+
+===================================================================
+SECTION H: THE MANDATORY PERSISTENCE TEST
+===================================================================
+
+This is the single test with real teeth. If this fails, the platform
+is not fit for radio broadcasting. Period.
+
+  1. Create a new station with a unique name
+  2. Generate a song via AI Studio
+  3. Add the song to a schedule
+  4. Save the schedule
+  5. Navigate away to a different page
+  6. Navigate back to the station
+  7. Verify the station, song, and schedule are intact
+  8. Hard refresh the page (F5)
+  9. Verify everything is STILL intact
+
+  [ ] PASS — station and schedule survive navigation
+  [ ] PASS — station and schedule survive hard refresh
+
+  IF EITHER FAILS: StruthRadio is NOT a functional radio platform.
+  Do not continue feature work. Fix persistence first.
+
+===================================================================
+WHAT CLAUDE IS NOT ALLOWED TO SUBSTITUTE FOR THIS TEST
+===================================================================
+
+  - "tsc passed" → NOT A BROADCASTING TEST
+  - "build passed" → NOT A BROADCASTING TEST
+  - "homepage loaded" → NOT A BROADCASTING TEST
+  - "one button clicked" → NOT A BROADCASTING TEST
+
+None of those prove StruthRadio can broadcast a radio station.
+Only Section H proves that.

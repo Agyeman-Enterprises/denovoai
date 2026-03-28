@@ -1,39 +1,34 @@
 {
-  "name": "denovo-platform",
+  "name": "denovoai",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "packageManager": "npm@10.5.0",
-  "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*",
-    "templates/*"
-  ],
   "scripts": {
-    "demo": "node services/orchestrator/run.js",
-    "resolve": "node services/module-engine/resolve.js --example",
-    "lint": "echo \"add eslint later\"",
-    "test": "node services/orchestrator/run.js --prompt \"self test\"",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui",
-    "e2e:headed": "playwright test --headed",
-    "e2e:report": "playwright show-report"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "ajv": "^8.12.0",
-    "dotenv": "^17.3.1",
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "dev": "next dev -p 4010",
+    "build": "next build",
+    "start": "next start -p 4010",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@anthropic-ai/sdk": "^0.80.0",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "stripe": "^21.0.1",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

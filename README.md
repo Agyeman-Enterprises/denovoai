@@ -1,31 +1,36 @@
-# DeNovo (Skeleton MVP)
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This repo is a runnable scaffold of the DeNovo AI creation platform described in `DENOVO.txt`. It is designed to be beginner-friendly while giving senior engineers a credible architecture to inspect and extend.
+## Getting Started
 
-## What exists now
-- Monorepo layout: `apps/`, `services/`, `packages/`, `templates/`, `.github/`.
-- Module governance defaults: platform core, use-case core, feature modules, stable vs experimental channels.
-- Example data: registry seeds, use-case rule map, knowledge-engine stubs, lockfile specimen.
-- Tiny demo scripts to show how the orchestrator resolves modules and produces a lockfile.
+First, run the development server:
 
-## Quick start
 ```bash
-node services/orchestrator/run.js --prompt "Build a gardening community with photo uploads"
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
-Outputs:
-- Artifacts under `runs/<id>/artifacts/` (ProductSpec, SystemDesign, RunLockfile).
-- Run log at `runs/<id>/run-log.json`.
-- Generated static app at `runs/<id>/app/index.html` showing modules/features/tests.
 
-### Environment
-- Copy `.env.example` to `.env.local` (already git-ignored) and fill in your Supabase project values.
-- Current `.env.local` is pre-populated with the Supabase URL and service role key you provided; keep it private.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Git remote
-Repo is initialized with origin set to `https://github.com/Agyeman-Enterprises/denovoai.git`. Run `git fetch` when you want to pull or compare with that remote.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Next steps (suggested)
-- Wire real LLM calls into `services/orchestrator/agents/`.
-- Implement persistent storage (Supabase or SQLite) for runs, events, and knowledge signals.
-- Replace the stub module registry with generated modules under `modules/`.
-- Build `apps/studio` as a Next.js UI that drives the orchestrator.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
