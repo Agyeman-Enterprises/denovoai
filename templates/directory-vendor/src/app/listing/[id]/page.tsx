@@ -41,7 +41,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">{listing.name}</h1>
-              {listing.is_featured && <span className="rounded-md px-2 py-0.5 text-xs text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span>}
+              {listing.is_featured ? <span className="rounded-md px-2 py-0.5 text-xs text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span> : null}
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-white/40">
               <span>{listing.category}</span>

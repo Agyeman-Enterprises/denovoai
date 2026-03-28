@@ -1,0 +1,19 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/listings/page": "app/admin/listings/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/api/admin/approve/route": "app/api/admin/approve/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/listings/[id]/route": "app/api/listings/[id]/route.js",
+  "/api/listings/route": "app/api/listings/route.js",
+  "/auth/callback/route": "app/auth/callback/route.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/auth/signout/route": "app/auth/signout/route.js",
+  "/browse/page": "app/browse/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/listing/[id]/page": "app/listing/[id]/page.js",
+  "/page": "app/page.js",
+  "/submit/page": "app/submit/page.js"
+}

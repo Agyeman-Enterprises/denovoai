@@ -57,7 +57,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-sm">{l.name as string}</h3>
-                    {l.is_featured && <span className="rounded-md px-1.5 py-0.5 text-[10px] text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span>}
+                    {l.is_featured ? <span className="rounded-md px-1.5 py-0.5 text-[10px] text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span> : null}
                   </div>
                   <span className="text-[10px] text-white/30">{l.category as string}{!!(l.location) ? ` · ${l.location}` : ""}</span>
                 </div>

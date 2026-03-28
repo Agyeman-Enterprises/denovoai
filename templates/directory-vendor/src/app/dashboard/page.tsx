@@ -44,7 +44,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{l.name as string}</p>
                     <span className="rounded-md px-1.5 py-0.5 text-[10px] font-medium" style={{ background: sc.bg, color: sc.color }}>{(l.status as string).toUpperCase()}</span>
-                    {l.is_featured && <span className="rounded-md px-1.5 py-0.5 text-[10px] text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span>}
+                    {l.is_featured ? <span className="rounded-md px-1.5 py-0.5 text-[10px] text-amber-400" style={{ background: "rgba(251,191,36,0.1)" }}>Featured</span> : null}
                   </div>
                   <p className="text-xs text-white/25">{l.category as string} &middot; {l.view_count as number} views</p>
                 </div>

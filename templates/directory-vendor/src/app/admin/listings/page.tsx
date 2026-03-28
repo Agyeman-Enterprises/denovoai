@@ -58,7 +58,7 @@ export default function AdminListingsPage() {
                       background: l.status === "active" ? "rgba(16,185,129,0.15)" : l.status === "pending" ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.05)",
                       color: l.status === "active" ? "#34d399" : l.status === "pending" ? "#fbbf24" : "rgba(255,255,255,0.3)",
                     }}>{(l.status as string).toUpperCase()}</span>
-                    {l.is_featured && <span className="text-[10px] text-amber-400">Featured</span>}
+                    {l.is_featured ? <span className="text-[10px] text-amber-400">Featured</span> : null}
                   </div>
                   <p className="text-xs text-white/25">{l.category as string} &middot; {l.view_count as number} views</p>
                 </div>

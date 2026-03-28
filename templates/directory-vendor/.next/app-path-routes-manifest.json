@@ -1,0 +1,19 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/admin/listings/page": "/admin/listings",
+  "/admin/page": "/admin",
+  "/api/admin/approve/route": "/api/admin/approve",
+  "/api/health/route": "/api/health",
+  "/api/listings/[id]/route": "/api/listings/[id]",
+  "/api/listings/route": "/api/listings",
+  "/auth/callback/route": "/auth/callback",
+  "/auth/login/page": "/auth/login",
+  "/auth/signout/route": "/auth/signout",
+  "/browse/page": "/browse",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/settings/page": "/dashboard/settings",
+  "/listing/[id]/page": "/listing/[id]",
+  "/page": "/",
+  "/submit/page": "/submit"
+}
