@@ -89,13 +89,13 @@ export default function BillingPage() {
                 </p>
               )}
               <div className="mt-4 flex gap-2">
-                {sub?.plan_id !== "free" && (
+                {sub?.plan_id && (
                   <Button variant="outline" size="sm" onClick={handlePortal}>
                     Manage Subscription
                   </Button>
                 )}
                 <Button size="sm" onClick={() => router.push("/pricing")}>
-                  {sub?.plan_id === "free" ? "Upgrade" : "Change Plan"}
+                  {sub?.plan_id ? "Change Plan" : "Subscribe"}
                 </Button>
               </div>
             </Card>

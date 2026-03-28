@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { getPriceIdForPlan } from "@/lib/plans";
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabase();
@@ -10,7 +11,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { priceId, annual } = await request.json();
+  const { planId, annual } = await request.json();
+
+  const priceId = getPriceIdForPlan(planId, annual);
+  if (!priceId) {
+    return NextResponse.json({ error: "Invalid plan or price not configured" }, { status: 400 });
+  }
 
   // Get or create Stripe customer
   const { data: sub } = await supabase
@@ -36,10 +42,10 @@ export async function POST(request: Request) {
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
-    line_items: [{ price: priceId || (annual ? process.env.STRIPE_STARTER_ANNUAL_PRICE_ID : process.env.STRIPE_STARTER_PRICE_ID), quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-    metadata: { user_id: user.id },
+    metadata: { user_id: user.id, plan_id: planId },
   });
 
   return NextResponse.json({ url: session.url });
