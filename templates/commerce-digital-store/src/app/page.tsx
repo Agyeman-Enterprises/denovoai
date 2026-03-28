@@ -1,65 +1,89 @@
-import Image from "next/image";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+const CATEGORIES = ["Templates", "Courses", "eBooks", "Music", "Design Assets", "Software"];
+
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: featured } = await supabase
+    .from("products")
+    .select("id, title, price_cents, images, category")
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(6);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-[#0A0A0F]">
+      <nav className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <Link href="/" className="text-lg font-bold text-white">{"{{APP_NAME}}"}</Link>
+        <div className="flex items-center gap-4">
+          <Link href="/shop" className="text-sm text-white/40 hover:text-white/70">Shop</Link>
+          <Link href="/cart" className="text-sm text-white/40 hover:text-white/70">Cart</Link>
+          <Link href="/auth/login" className="text-sm text-white/40 hover:text-white/70">Sign In</Link>
+          <Link href="/admin" className="rounded-lg px-4 py-2 text-sm font-semibold text-white" style={{ background: "#8B5CF6" }}>
+            Admin
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </nav>
+
+      <section className="px-6 py-24 text-center">
+        <h1 className="mx-auto max-w-3xl text-4xl font-bold sm:text-6xl">
+          {"{{APP_TAGLINE}}"}
+        </h1>
+        <p className="mt-4 text-lg text-white/40">
+          Browse {"{{PRODUCT_NOUN_PLURAL}}"} and get instant delivery.
+        </p>
+        <div className="mt-8 flex justify-center gap-4">
+          <Link href="/shop" className="rounded-lg px-6 py-3 font-semibold text-white" style={{ background: "#8B5CF6" }}>
+            Browse {"{{STORE_NOUN}}"}
+          </Link>
         </div>
-      </main>
+      </section>
+
+      <section className="px-6 pb-12">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-xl font-bold mb-4">Categories</h2>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map(c => (
+              <Link key={c} href={`/shop?category=${c}`} className="rounded-lg px-4 py-2 text-sm transition-colors hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                {c}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {(featured && featured.length > 0) && (
+        <section className="px-6 pb-16">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-xl font-bold mb-6">Featured {"{{PRODUCT_NOUN_PLURAL}}"}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((p: Record<string, unknown>) => {
+                const imgs = p.images as string[] | null;
+                return (
+                  <Link key={p.id as string} href={`/product/${p.id}`} className="group rounded-xl overflow-hidden transition-all hover:ring-1 hover:ring-violet-500/30" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    {imgs && imgs.length > 0
+                      ? <div className="aspect-video bg-white/5 overflow-hidden"><img src={imgs[0]} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform" /></div>
+                      : <div className="aspect-video bg-gradient-to-br from-violet-600/20 to-violet-900/10" />
+                    }
+                    <div className="p-4">
+                      <h3 className="font-semibold text-sm">{p.title as string}</h3>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-white/30">{p.category as string}</span>
+                        <span className="text-sm font-bold text-violet-400">${((p.price_cents as number) / 100).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <footer className="px-6 py-8 text-center text-xs text-white/20" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        {"{{APP_NAME}}"} &mdash; {"{{APP_TAGLINE}}"}
+      </footer>
     </div>
   );
 }
