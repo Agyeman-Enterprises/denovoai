@@ -1,0 +1,31 @@
+# ci.yml — Per-repo CI workflow (installed by repo-bootstrap.sh)
+# Calls reusable workflows from ae-enforcement control plane.
+# DO NOT MODIFY — changes will be reverted by drift remediation.
+
+name: "AE Enforcement CI"
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: "Run Gates"
+    uses: Agyeman-Enterprises/ae-enforcement/.github/workflows/gate-ci.yml@main
+    with:
+      app_port: 3000
+      node_version: "20"
+    secrets: inherit
+
+  attestation:
+    name: "Verify Attestation"
+    needs: [gates]
+    uses: Agyeman-Enterprises/ae-enforcement/.github/workflows/attest-ci.yml@main
+    secrets: inherit

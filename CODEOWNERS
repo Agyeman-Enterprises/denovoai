@@ -1,0 +1,4 @@
+# AE Enforcement — protected files
+GATE7.txt @Agyeman-Enterprises/enforcement-admins
+.github/workflows/ci.yml @Agyeman-Enterprises/enforcement-admins
+scripts/run-gate.sh @Agyeman-Enterprises/enforcement-admins
