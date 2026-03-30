@@ -41,3 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 */node_modules/
+
+# Claude enforcement markers (session-specific, not committed)
+.claude/PLAN_APPROVED
+.claude/GATE_PASSED
+.claude/SCHEMA_READ
+.claude/TSC_PASSED
