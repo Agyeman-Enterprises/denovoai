@@ -1,0 +1,105 @@
+# GATE7.txt — [APP_NAME]: PRODUCT-SPECIFIC BEHAVIORAL TEST
+# ============================================================
+# Replace [APP_NAME] with the actual app name.
+# Replace every [ ] item with the actual behavior for this app.
+# Every check must be tested in the RUNNING APP — not in code.
+# Claude Code must write Playwright specs covering every section.
+# ============================================================
+
+APP: [APP_NAME]
+DESCRIPTION: [One sentence describing what this app does and who uses it]
+CRITICAL_FLOW: [The single most important user journey — e.g. "user creates X, publishes it, views it, data persists on refresh"]
+
+This file is read by RELEASE_GATE.txt Gate 7 and covered by
+e2e/specs/05.behavioral.spec.ts.
+
+===================================================================
+SECTION A: NAVIGATION — ALL TOP-LEVEL ROUTES & UI
+===================================================================
+
+  [ ] App loads at localhost:[PORT]           → [main UI element] visible
+  [ ] [Primary nav item 1]                   → [what renders]
+  [ ] [Primary nav item 2]                   → [what renders]
+  [ ] [Primary nav item 3]                   → [what renders]
+  [ ] No dead links — every nav item resolves to real content
+  [ ] No 404 pages reachable from nav
+  [ ] Page title is correct (not "React App" or "Next.js")
+
+===================================================================
+SECTION B: AUTH FLOW (skip if no auth)
+===================================================================
+
+  [ ] Signup creates account (data in DB — verify in Supabase)
+  [ ] Login with valid credentials → reaches [dashboard/main view]
+  [ ] Login with bad credentials → shows error message (not blank)
+  [ ] Logout button exists and is reachable
+  [ ] Logout clears session (protected route redirects after logout)
+  [ ] Protected routes redirect unauthenticated users to login
+
+===================================================================
+SECTION C: PRIMARY ENTITY — CRUD
+===================================================================
+
+Primary entity: [e.g. "projects", "patients", "tasks", "invoices"]
+
+  [ ] CREATE: [entity] form exists → submit → [entity] appears in list
+  [ ] READ:   List renders [entities] from DB (not hardcoded)
+  [ ] UPDATE: Edit form loads existing data → save → changes persist
+  [ ] DELETE: Delete button → confirmation → [entity] removed from list
+  [ ] PERSIST: Created [entity] survives hard browser refresh
+
+===================================================================
+SECTION D: SECONDARY ENTITY — CRUD (if applicable)
+===================================================================
+
+Secondary entity: [e.g. "comments", "line items", "attachments"]
+
+  [ ] CREATE: [entity] created and linked to parent [primary entity]
+  [ ] READ:   [entity] displays correctly under parent
+  [ ] UPDATE: [entity] editable inline or via form
+  [ ] DELETE: [entity] removable without deleting parent
+  [ ] PERSIST: [entity] survives hard browser refresh
+
+===================================================================
+SECTION E: CRITICAL USER FLOW
+===================================================================
+
+[Describe the single most important end-to-end flow for this app.
+ Replace every line below with the actual steps.]
+
+  [ ] Step 1: [User does X]
+  [ ] Step 2: [System responds with Y]
+  [ ] Step 3: [User does Z]
+  [ ] Step 4: [Data appears where expected]
+  [ ] Step 5: Hard refresh → all data still present
+  [ ] Step 6: Close and reopen browser → all data still present
+
+===================================================================
+SECTION F: DATA INTEGRITY
+===================================================================
+
+  [ ] No hardcoded demo/fake data visible in the UI
+  [ ] No placeholder names ("John Doe", "Demo User", "Test Project")
+  [ ] Empty state shown when list has no items (not fake data)
+  [ ] User-entered data stored in database (verify in Supabase/DB)
+  [ ] Data entered on one page visible where expected elsewhere
+
+===================================================================
+SECTION G: MOBILE RESPONSIVE
+===================================================================
+
+  [ ] App renders correctly at 375px width (iPhone SE)
+  [ ] No horizontal scroll on mobile
+  [ ] All buttons tappable (min 44px touch targets)
+  [ ] Navigation usable on mobile
+
+===================================================================
+WHAT CLAUDE IS NOT ALLOWED TO SUBSTITUTE FOR THIS TEST
+===================================================================
+
+  - "tsc passed"                         → NOT A PRODUCT TEST
+  - "build succeeded"                    → NOT A PRODUCT TEST
+  - "component renders"                  → NOT A PRODUCT TEST
+  - "API returns 200"                    → NOT A PRODUCT TEST
+  - "the code looks correct"             → NOT A PRODUCT TEST
+  - Only the full end-to-end flow above in the running app counts.
