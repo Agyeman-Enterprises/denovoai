@@ -719,6 +719,17 @@ process.stdin.on('end',()=>{
     exit 1
   fi
 
+  # Augment cert with machine identity for CI verification
+  CERT_JSON=$(echo "$CERT_JSON" | python3 -c "
+import json, sys
+cert = json.load(sys.stdin)
+cert['machine_id'] = '${MACHINE_ID:-unknown}'
+cert['machine_public_key_fingerprint'] = '${MACHINE_FINGERPRINT:-}'
+cert['enforcement_version'] = '${ENFORCEMENT_VERSION:-0.0.0}'
+cert['policy_version'] = '${ENFORCEMENT_VERSION:-0.0.0}'
+print(json.dumps(cert, indent=2))
+" 2>/dev/null || echo "$CERT_JSON")
+
   mkdir -p .claude
   echo "$CERT_JSON" > "$GATE_CERT_FILE"
 
