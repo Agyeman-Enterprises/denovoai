@@ -10,27 +10,45 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const supabase = createClient();
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { shouldCreateUser: true },
     });
 
     if (err) {
       setError(err.message);
     } else {
       setSent(true);
+    }
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const { error: err } = await supabase.auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: "email",
+    });
+
+    if (err) {
+      setError(err.message);
+    } else {
+      window.location.href = "/dashboard";
     }
     setLoading(false);
   };
@@ -57,11 +75,32 @@ export default function LoginPage() {
           </div>
 
           {sent ? (
-            <div className="mt-8 rounded-xl border border-border bg-card p-6 text-center">
-              <p className="text-sm">
-                Check your email for a magic link.
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">{email}</p>
+            <div className="mt-8 space-y-4">
+              <div className="rounded-xl border border-border bg-card p-4 text-center">
+                <p className="text-sm">Enter the code sent to your email</p>
+                <p className="mt-1 text-xs text-muted-foreground">{email}</p>
+              </div>
+              <form onSubmit={handleVerifyCode} className="space-y-3">
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="6-digit code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  maxLength={6}
+                  required
+                />
+                {error && <p className="text-xs text-destructive">{error}</p>}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Verifying..." : "Verify"}
+                </Button>
+              </form>
+              <button
+                onClick={() => { setSent(false); setCode(""); setError(""); }}
+                className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+              >
+                Back
+              </button>
             </div>
           ) : (
             <div className="mt-8 space-y-4">
@@ -91,7 +130,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleMagicLink} className="space-y-3">
+              <form onSubmit={handleSendCode} className="space-y-3">
                 <Input
                   type="email"
                   placeholder="you@example.com"
@@ -101,7 +140,7 @@ export default function LoginPage() {
                 />
                 {error && <p className="text-xs text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Sending..." : "Send Magic Link"}
+                  {loading ? "Sending..." : "Send Code"}
                 </Button>
               </form>
             </div>

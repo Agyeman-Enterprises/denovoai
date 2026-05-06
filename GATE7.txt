@@ -1,117 +1,167 @@
-STRUTHRADIO — GATE 7: PRODUCT-SPECIFIC BEHAVIORAL TEST
+DENOVOAI — GATE 7: PRODUCT-SPECIFIC BEHAVIORAL TEST
 =====================================================
-StruthRadio is an AI radio platform with music generation and broadcasting.
-Verification must center on the BROADCASTING WORKFLOW, not static build health.
+DeNovoAI is an AI-powered app factory that turns a plain-English description into
+production source code or a live deployed business — via a conversational Studio
+interface, template assembly, and Coolify/Gitea hosting.
+Verification must center on the APP GENERATION WORKFLOW, not static build health.
 
 This file is read by RELEASE_GATE.txt Gate 7.
-Every check below must PASS before StruthRadio can be called done.
+Every check below must PASS before DeNovoAI can be called done.
 
 ===================================================================
 SECTION A: NAVIGATION — ALL TOP-LEVEL ROUTES
 ===================================================================
 
-  [ ] Landing page opens           → readySelector: main present
-  [ ] Dashboard opens              → readySelector: main present
-  [ ] AI Studio opens              → readySelector: main present
-  [ ] AI DJ opens                  → readySelector: main present
-  [ ] Voice Lab opens              → readySelector: main present
-  [ ] Library opens                → readySelector: main present
-  [ ] Schedule opens               → readySelector: main present
-  [ ] Wallet opens                 → readySelector: main present
-  [ ] Upload opens                 → readySelector: main present
-  [ ] Onboarding opens             → readySelector: main present
+  [ ] Landing page (/) opens              → hero text "From idea to" visible
+  [ ] /auth/login opens                   → "Sign in to DeNovo" heading visible
+  [ ] /studio opens (auth required)       → AI chat interface visible, redirects to login if unauthed
+  [ ] /dashboard opens (auth required)    → "My Apps" heading visible, redirects to login if unauthed
+  [ ] /dashboard/billing opens            → "Billing" heading visible, plan card present
+  [ ] /pricing opens                      → "DeNovo doesn't charge for prompts" heading visible
+  [ ] /pricing#build tab shows 4 plans    → Starter, Builder, Studio, Agency
+  [ ] /pricing#launch tab shows 4 plans   → Launch 1, Launch 5, Launch 15, Launch 40
+  [ ] /terms opens                        → text content visible
+  [ ] /privacy opens                      → text content visible
+  [ ] /security opens                     → text content visible
+  [ ] /acceptable-use opens               → text content visible
 
 ===================================================================
-SECTION B: STATION CRUD
+SECTION B: AUTH FLOW
 ===================================================================
 
-  [ ] Create new station works
-  [ ] Station list renders with real data
-  [ ] Edit station metadata (name, genre, description)
-  [ ] Delete station works (with confirmation)
-  [ ] Station data persists in Supabase
+  [ ] Login page renders magic-link form   → email input + "Send Magic Link" button
+  [ ] Login page renders OAuth buttons     → "Continue with Google", "Continue with GitHub"
+  [ ] Magic-link submission shows confirmation → "Check your email for a magic link" visible
+  [ ] Unauthenticated /studio redirects to /auth/login
+  [ ] Unauthenticated /dashboard redirects to /auth/login
+  [ ] Authenticated user: navbar shows "Studio", "Dashboard", "New App", "Sign Out"
+  [ ] Sign Out button clears session and returns to landing page
+  [ ] After sign-out, hitting /dashboard redirects to /auth/login
 
 ===================================================================
-SECTION C: SCHEDULE BUILDER
+SECTION C: STUDIO — AI GENERATION WORKFLOW (core value prop)
 ===================================================================
 
-  [ ] Schedule view renders time slots
-  [ ] Add song/segment to schedule works
-  [ ] Remove song/segment from schedule works
-  [ ] Reorder schedule items works
-  [ ] Schedule saves to database
+  [ ] /studio loads with welcome message   → "Hi! Tell me about the app you want to build."
+  [ ] User can type message in chat input
+  [ ] Sending message hits /api/denovo/parse and AI responds
+  [ ] "DeNovo is thinking..." loading state appears during API call
+  [ ] Enter key submits message (no Shift key required)
+  [ ] After sufficient input, stage advances to "confirming"
+  [ ] When stage = confirming, input is disabled
+  [ ] App auto-navigates to /studio/confirm/[sessionId] when confirming stage reached
 
 ===================================================================
-SECTION D: MUSIC GENERATION (core value prop)
+SECTION D: CONFIRMATION — REVIEW BEFORE BUILD
 ===================================================================
 
-  [ ] AI Studio accepts generation parameters
-  [ ] Music generation produces audio output
-  [ ] Generated audio is playable in browser
-  [ ] Generated song saves to library
-  [ ] Song metadata (title, genre, duration) is captured
+  [ ] /studio/confirm/[sessionId] loads session slot_map from Supabase
+  [ ] Confirmation card shows: app name, template type, feature badges
+  [ ] "Edit anything" button returns to /studio with resume param
+  [ ] "Deploy it" button creates app record in DB and navigates to progress screen
+  [ ] "Download instead" button creates app record with output_type=download
+  [ ] Session not found case shows graceful "Session not found" message
 
 ===================================================================
-SECTION E: TTS / VOICE
+SECTION E: APP BUILD PROGRESS
 ===================================================================
 
-  [ ] Voice Lab accepts text input
-  [ ] TTS generates audio from text (ElevenLabs)
-  [ ] Generated voice clip is playable
-  [ ] Voice clips can be added to schedule
+  [ ] /studio/[sessionId]?jobId=... renders progress card
+  [ ] Progress bar displays and increments as job progresses
+  [ ] Log messages appear as build stages complete
+  [ ] Build stage label updates: "Building your app..." → "Your app is ready!"
+  [ ] When done (deploy): "Open App" and "View Repo" buttons appear
+  [ ] When done (download): "Download" button appears
+  [ ] "Go to Dashboard" button always appears on completion
+  [ ] Error stage shows error message in red panel
+  [ ] Missing jobId shows graceful "No active build job" message
 
 ===================================================================
-SECTION F: BROADCAST
+SECTION F: DASHBOARD — APP MANAGEMENT
 ===================================================================
 
-  [ ] Broadcast start button initiates stream
-  [ ] Broadcast stop button ends stream
-  [ ] Broadcast status indicator shows live/offline
-  [ ] Listener stream URL is accessible
-  [ ] Listener can hear audio from the stream (Icecast/socket)
-  [ ] Scheduled content plays in sequence during broadcast
+  [ ] Dashboard shows "My Apps" heading
+  [ ] Empty state renders: "No apps yet." + "Build Your First App" button
+  [ ] App cards show: name, template badge, status badge, creation date
+  [ ] Status badges: Parsing, Confirming, Assembling, Deploying, Live, Downloaded, Failed
+  [ ] Failed apps show error_message truncated on card
+  [ ] "New App" button navigates to /studio
+  [ ] Clicking any app card navigates to /dashboard/app/[appId]
 
 ===================================================================
-SECTION G: LIBRARY MANAGEMENT
+SECTION G: APP DETAIL — READ, UPDATE CONTEXT, DELETE
 ===================================================================
 
-  [ ] Library shows all songs/clips
-  [ ] Upload music file works
-  [ ] Song metadata is editable
-  [ ] Delete song works
-  [ ] Filter/search library works
+  [ ] /dashboard/app/[appId] shows app name, template badge, status badge
+  [ ] Details card shows: slug, output type, credits used, created date
+  [ ] Links card shows "Open App" if coolify_domain exists
+  [ ] Links card shows "View Repo" if gitea_repo_url exists
+  [ ] Links card shows "Download" if download_url exists
+  [ ] Slot Map card renders JSON of app configuration
+  [ ] "Delete App" button triggers browser confirm dialog
+  [ ] Confirming delete calls DELETE /api/apps/[appId] and redirects to /dashboard
+  [ ] Cancelling delete does NOT delete the app
+  [ ] Back arrow "← Back to Dashboard" link works
 
 ===================================================================
-SECTION H: THE MANDATORY PERSISTENCE TEST
+SECTION H: BILLING
 ===================================================================
 
-This is the single test with real teeth. If this fails, the platform
-is not fit for radio broadcasting. Period.
+  [ ] Billing page shows current plan (or "Free" if no subscription)
+  [ ] Credits remaining count is displayed
+  [ ] "Subscribe" / "Change Plan" button navigates to /pricing
+  [ ] "Manage Subscription" button calls /api/stripe/portal (redirects to Stripe)
+  [ ] Credit top-up packs are rendered (3 options visible)
+  [ ] Clicking a credit pack calls /api/stripe/credits checkout
 
-  1. Create a new station with a unique name
-  2. Generate a song via AI Studio
-  3. Add the song to a schedule
-  4. Save the schedule
-  5. Navigate away to a different page
-  6. Navigate back to the station
-  7. Verify the station, song, and schedule are intact
-  8. Hard refresh the page (F5)
-  9. Verify everything is STILL intact
+===================================================================
+SECTION I: THE MANDATORY PERSISTENCE TEST
+===================================================================
 
-  [ ] PASS — station and schedule survive navigation
-  [ ] PASS — station and schedule survive hard refresh
+This is the single test with real teeth. If this fails, DeNovoAI cannot
+deliver on its core promise. Do not ship until this section passes entirely.
 
-  IF EITHER FAILS: StruthRadio is NOT a functional radio platform.
-  Do not continue feature work. Fix persistence first.
+  1. Log in as test user
+  2. Navigate to /studio → start a new chat session
+  3. Describe an app: "A marketplace for freelance dog walkers"
+  4. Continue through clarifying questions until stage reaches "confirming"
+  5. Verify /studio/confirm/[sessionId] loads with correct app details
+  6. Verify slot_map data matches what was described (app name, template)
+  7. Click "Deploy it" — verify app record is created in /dashboard
+  8. Navigate to /dashboard — verify the new app appears in the list
+  9. Navigate away (go to /pricing), then back to /dashboard
+  10. Verify the app is STILL in the list
+  11. Hard refresh /dashboard (Ctrl+R) — verify app still present
+  12. Click the app card → verify /dashboard/app/[appId] loads with correct details
+  13. Log out → log back in → verify the app is still in My Apps list
+
+  [ ] PASS — app record created and survives navigation
+  [ ] PASS — app record survives hard refresh
+  [ ] PASS — app record survives logout + re-login
+
+  IF ANY FAILS: DeNovoAI cannot retain generated apps. Data is lost.
+  Fix Supabase RLS / user_id assignment before continuing.
+
+===================================================================
+SECTION J: MOBILE RESPONSIVENESS
+===================================================================
+
+  [ ] Landing page renders at 375px width — hero text not clipped
+  [ ] Navbar at 375px — logo and CTA button visible (nav links can collapse)
+  [ ] /auth/login at 375px — form fully usable, no horizontal scroll
+  [ ] /pricing at 375px — plans stack vertically, prices readable
+  [ ] /dashboard at 375px — app cards stack to single column
+  [ ] /studio at 375px — chat input fills width, Send button tappable
 
 ===================================================================
 WHAT CLAUDE IS NOT ALLOWED TO SUBSTITUTE FOR THIS TEST
 ===================================================================
 
-  - "tsc passed" → NOT A BROADCASTING TEST
-  - "build passed" → NOT A BROADCASTING TEST
-  - "homepage loaded" → NOT A BROADCASTING TEST
-  - "one button clicked" → NOT A BROADCASTING TEST
+  - "tsc passed" → NOT AN APP GENERATION TEST
+  - "build succeeded" → NOT AN APP GENERATION TEST
+  - "homepage loaded" → NOT AN APP GENERATION TEST
+  - "API returns 200" → NOT AN APP GENERATION TEST
 
-None of those prove StruthRadio can broadcast a radio station.
-Only Section H proves that.
+Only Section I proves that DeNovoAI can accept a user's description,
+generate an app spec, store it, and deliver a deployable or downloadable result.
+Nothing else counts as PASS.

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -34,7 +35,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <div className="mx-auto max-w-3xl px-6 py-12">
         <div className="flex items-start gap-5">
           {listing.logo_url ? (
-            <img src={listing.logo_url} alt="" className="h-16 w-16 rounded-xl object-cover shrink-0" />
+            <Image src={listing.logo_url} alt="" width={64} height={64} className="h-16 w-16 rounded-xl object-cover shrink-0" unoptimized />
           ) : (
             <div className="h-16 w-16 rounded-xl bg-violet-600/20 flex items-center justify-center text-xl font-bold text-violet-400 shrink-0">{listing.name.charAt(0)}</div>
           )}

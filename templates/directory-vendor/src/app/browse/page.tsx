@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 
 const CATEGORIES = ["All", "Design", "Development", "Marketing", "Writing", "Consulting", "Finance"];
@@ -50,7 +51,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             <Link key={l.id as string} href={`/listing/${l.id}`} className="group rounded-xl p-5 transition-all hover:ring-1 hover:ring-violet-500/30" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <div className="flex items-center gap-3 mb-3">
                 {!!(l.logo_url) ? (
-                  <img src={l.logo_url as string} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                  <Image src={l.logo_url as string} alt="" width={40} height={40} className="h-10 w-10 rounded-lg object-cover" unoptimized />
                 ) : (
                   <div className="h-10 w-10 rounded-lg bg-violet-600/20 flex items-center justify-center text-sm font-bold text-violet-400">{(l.name as string).charAt(0)}</div>
                 )}

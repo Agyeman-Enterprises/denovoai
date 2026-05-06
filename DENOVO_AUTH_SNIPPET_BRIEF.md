@@ -12,7 +12,7 @@ NEVER:
 - Run `cloudflared` commands
 - Touch Traefik config
 
-Your job ends at: all three auth methods work, app runs on port 4013,
+Your job ends at: all three auth methods work, app runs on port 6001,
 build passes clean. Owner handles Cloudflare manually.
 
 ---
@@ -39,7 +39,7 @@ This is NOT a prototype. This is production-grade reference code.
 | Auth | Supabase Auth via `@supabase/ssr` (NOT `@supabase/auth-helpers`) |
 | Styling | Tailwind CSS |
 | Language | TypeScript strict mode |
-| Port | 4013 |
+| Port | 6001 |
 | Deployment | Hetzner via Coolify |
 
 **Critical:** Use `@supabase/ssr` not the deprecated `@supabase/auth-helpers-nextjs`.
@@ -61,9 +61,9 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 
 In Supabase → Authentication → URL Configuration set:
 ```
-Site URL:       http://localhost:4013
-Redirect URLs:  http://localhost:4013/auth/callback
-                https://auth-test.agyemanenterprises.com/auth/callback
+Site URL:       http://localhost:6001
+Redirect URLs:  http://localhost:6001/auth/callback
+                https://snippet-harness.agyemanenterprises.com/auth/callback
 ```
 
 For Google OAuth — in Supabase → Authentication → Providers → Google:
@@ -373,7 +373,7 @@ export default async function DashboardLayout({
 export async function GET() {
   return Response.json({
     status: 'ok',
-    service: 'denovo-auth-snippet',
+    service: 'denovo-snippet-harness',
     version: '1.0.0'
   })
 }
@@ -387,16 +387,16 @@ export async function GET() {
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:4013
+NEXT_PUBLIC_APP_URL=http://localhost:6001
 ```
 
 ---
 
 ## Coolify Config
 
-- Port: **4013**
+- Port: **6001**
 - Health check: `/api/health`
-- Domain: `https://auth-test.agyemanenterprises.com` (owner adds to Cloudflare manually)
+- Domain: `https://snippet-harness.agyemanenterprises.com` (owner adds to Cloudflare manually)
 - Do NOT configure Cloudflare
 
 ---
@@ -427,7 +427,7 @@ Manually test each flow before declaring done:
 - ❌ Adding features beyond auth
 - ❌ Using `@supabase/auth-helpers-nextjs` — it's deprecated
 - ❌ Using `middleware.ts` — Next.js 16 uses `proxy.ts`
-- ❌ Changing the port from 4013
+- ❌ Changing the port from 6001
 
 ---
 
@@ -440,6 +440,6 @@ Manually test each flow before declaring done:
 5. ✅/❌ Route protection — unauthenticated blocked, authenticated redirected
 6. ✅/❌ Sign out — clears session, redirects to login
 7. ✅/❌ `npm run build` passes clean
-8. Port running on: must be **4013**
+8. Port running on: must be **6001**
 
 Then stop. Do not attempt Cloudflare or DNS configuration.

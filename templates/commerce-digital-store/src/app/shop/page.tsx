@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 
 const CATEGORIES = ["All", "Templates", "Courses", "eBooks", "Music", "Design Assets", "Software"];
@@ -59,7 +60,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             return (
               <Link key={p.id as string} href={`/product/${p.id}`} className="group rounded-xl overflow-hidden transition-all hover:ring-1 hover:ring-violet-500/30" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 {imgs && imgs.length > 0
-                  ? <div className="aspect-video bg-white/5 overflow-hidden"><img src={imgs[0]} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform" /></div>
+                  ? <div className="aspect-video bg-white/5 overflow-hidden"><Image src={imgs[0]} alt="" width={400} height={225} className="h-full w-full object-cover group-hover:scale-105 transition-transform" unoptimized /></div>
                   : <div className="aspect-video bg-gradient-to-br from-violet-600/20 to-violet-900/10" />
                 }
                 <div className="p-4">

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 interface CartItem { productId: string; quantity: number; priceCents: number; title: string }
@@ -80,7 +81,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="mx-auto max-w-3xl px-6 py-12">
         {imgs && imgs.length > 0 && (
           <div className="rounded-xl overflow-hidden aspect-video bg-white/5 mb-8">
-            <img src={imgs[0]} alt="" className="h-full w-full object-cover" />
+            <Image src={imgs[0]} alt="" width={600} height={400} className="h-full w-full object-cover" unoptimized />
           </div>
         )}
 

@@ -1,0 +1,4 @@
+[     325ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://gitea.agyemanenterprises.com/:0
+[     632ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://gitea.agyemanenterprises.com/favicon.ico:0
+[    4530ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://gitea.agyemanenterprises.com/:0
+[    4838ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://gitea.agyemanenterprises.com/favicon.ico:0

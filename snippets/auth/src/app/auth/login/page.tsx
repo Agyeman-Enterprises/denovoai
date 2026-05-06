@@ -11,19 +11,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState("");
   const supabase = createClient();
 
-  const handleMagicLink = async () => {
+  const handleSendCode = async () => {
     setLoading(true);
     setError("");
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { shouldCreateUser: true },
     });
     if (err) setError(err.message);
-    else setMessage("Check your email for a magic link.");
+    else setOtpSent(true);
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const { error: err } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode.trim(),
+      type: "email",
+    });
+    if (err) setError(err.message);
+    else window.location.href = "/dashboard";
     setLoading(false);
   };
 
@@ -43,10 +58,9 @@ export default function LoginPage() {
       const { error: err } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (err) setError(err.message);
-      else setMessage("Check your email to confirm your account.");
+      else window.location.href = "/dashboard";
     } else {
       const { error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) setError(err.message);
@@ -55,13 +69,35 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  if (message) {
+  if (otpSent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#06060f] px-4">
-        <div className="w-full max-w-sm rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <p className="text-sm text-white/70">{message}</p>
-          <p className="mt-2 text-xs text-white/30">{email}</p>
-          <button onClick={() => setMessage("")} className="mt-4 text-xs text-violet-400 hover:text-violet-300">Back to login</button>
+        <div className="w-full max-w-sm rounded-2xl p-8" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-sm text-white/70 text-center">Enter the code sent to your email</p>
+          <p className="mt-1 text-xs text-white/30 text-center">{email}</p>
+          <form onSubmit={handleVerifyCode} className="mt-6 space-y-3">
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="6-digit code"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value)}
+              required
+              autoFocus
+              className="w-full rounded-xl px-4 py-3 text-sm text-white text-center tracking-widest placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            />
+            {error && <p className="text-xs text-red-400">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl py-3 text-sm font-semibold text-white transition-all disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #8B5CF6, #7c3aed)" }}
+            >
+              {loading ? "..." : "Verify Code"}
+            </button>
+          </form>
+          <button onClick={() => { setOtpSent(false); setOtpCode(""); setError(""); }} className="mt-4 w-full text-center text-xs text-violet-400 hover:text-violet-300">Back to login</button>
         </div>
       </div>
     );
@@ -137,15 +173,15 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Magic link */}
+          {/* Send code */}
           {email && mode === "signin" && (
             <button
-              onClick={handleMagicLink}
+              onClick={handleSendCode}
               disabled={loading}
               className="w-full rounded-xl py-2.5 text-xs font-medium text-violet-400 transition-all hover:text-violet-300"
               style={{ border: "1px solid rgba(139,92,246,0.2)" }}
             >
-              Send Magic Link instead
+              Send verification code instead
             </button>
           )}
 
