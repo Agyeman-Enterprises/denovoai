@@ -42,11 +42,8 @@ yarn-error.log*
 next-env.d.ts
 */node_modules/
 
-.vercel
-
-# AE Scope Guard — OO approval state (local only)
-.claude/OO_APPROVED.json
-.claude/OO_COMPLETE.json
-.claude/OO_PENDING.json
-.claude/OO_VIOLATION.json
-.claude/VIOLATIONS.log
+# Claude enforcement markers (session-specific, not committed)
+.claude/PLAN_APPROVED
+.claude/GATE_PASSED
+.claude/SCHEMA_READ
+.claude/TSC_PASSED
