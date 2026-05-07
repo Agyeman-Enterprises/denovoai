@@ -1,0 +1,37 @@
+{
+  "common": {
+    "loading":     "Loading...",
+    "error":       "Something went wrong.",
+    "retry":       "Try again",
+    "save":        "Save",
+    "cancel":      "Cancel",
+    "delete":      "Delete",
+    "edit":        "Edit",
+    "create":      "Create",
+    "back":        "Back",
+    "next":        "Next",
+    "submit":      "Submit",
+    "search":      "Search",
+    "filter":      "Filter",
+    "noResults":   "No results found.",
+    "comingSoon":  "Coming soon"
+  },
+  "auth": {
+    "signIn":       "Sign in",
+    "signOut":      "Sign out",
+    "signUp":       "Sign up",
+    "email":        "Email",
+    "password":     "Password",
+    "forgotPwd":    "Forgot password?",
+    "resetPwd":     "Reset password",
+    "verifyEmail":  "Verify your email",
+    "unauthorized": "You are not authorized to view this page."
+  },
+  "errors": {
+    "required":    "This field is required.",
+    "invalidEmail":"Enter a valid email address.",
+    "tooShort":    "Must be at least {min} characters.",
+    "tooLong":     "Must be no more than {max} characters.",
+    "serverError": "A server error occurred. Please try again."
+  }
+}

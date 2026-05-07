@@ -76,7 +76,7 @@ export async function POST(request: Request) {
             stripe_customer_id: session.customer as string,
             status: "active",
             credits_remaining: plan.credits,
-            current_period_end: new Date(subscription.items.data[0]?.current_period_end * 1000).toISOString(),
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", userId);
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         .single();
 
       if (sub) {
-        const periodEnd = subscription.items.data[0]?.current_period_end;
+        const periodEnd = subscription.current_period_end;
         await supabase
           .from("subscriptions")
           .update({
