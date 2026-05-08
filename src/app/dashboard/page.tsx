@@ -52,7 +52,7 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">My Apps</h1>
-            <Link href="/studio" data-testid="nav-studio">
+            <Link href="/studio">
               <Button>New App</Button>
             </Link>
           </div>
@@ -62,7 +62,7 @@ export default function DashboardPage() {
           ) : apps.length === 0 ? (
             <Card className="mt-8 text-center py-12">
               <p className="text-muted-foreground">No apps yet.</p>
-              <Link href="/studio" data-testid="nav-studio">
+              <Link href="/studio">
                 <Button className="mt-4">Build Your First App</Button>
               </Link>
             </Card>

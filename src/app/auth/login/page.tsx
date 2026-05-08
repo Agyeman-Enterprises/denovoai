@@ -97,7 +97,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required data-testid="email-input"
+                  required
                 />
               </div>
               <div className="space-y-1">
@@ -110,12 +110,12 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={8} data-testid="password-input"
+                  minLength={8}
                 />
               </div>
               {error && <p className="text-xs text-destructive">{error}</p>}
               {info && <p className="text-xs text-muted-foreground">{info}</p>}
-              <Button type="submit" className="w-full" disabled={loading} data-testid="submit-btn">
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
               </Button>
             </form>

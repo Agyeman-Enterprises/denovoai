@@ -126,7 +126,7 @@ export function MfaChallengeForm({ className, ...props }: React.ComponentPropsWi
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || code.length !== 6 || !challenge} data-testid="submit-btn"
+                disabled={isLoading || code.length !== 6 || !challenge}
               >
                 {isLoading ? 'Verifying…' : 'Verify'}
               </Button>

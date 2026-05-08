@@ -110,14 +110,14 @@ export function AdminUserManagement() {
               {inviteError && <p className="text-sm text-destructive">{inviteError}</p>}
               <div className="space-y-1">
                 <Label htmlFor="inv-email">Email</Label>
-                <Input id="inv-email" type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} data-testid="email-input" />
+                <Input id="inv-email" type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="inv-pw">Password</Label>
-                <Input id="inv-pw" type="password" required value={invitePassword} onChange={(e) => setInvitePassword(e.target.value)} data-testid="password-input" />
+                <Input id="inv-pw" type="password" required value={invitePassword} onChange={(e) => setInvitePassword(e.target.value)} />
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={inviting} data-testid="submit-btn">{inviting ? 'Creating…' : 'Create user'}</Button>
+                <Button type="submit" disabled={inviting}>{inviting ? 'Creating…' : 'Create user'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
