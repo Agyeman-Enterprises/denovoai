@@ -1,0 +1,339 @@
+{
+  "fileOperations": {
+    "export": {
+      "route": "/api/export",
+      "triggerTestid": "export-btn",
+      "expectedContentType": "text/csv",
+      "enabled": false
+    },
+    "import": {
+      "route": "/api/import",
+      "sampleFileName": "import-test.csv",
+      "inputTestid": "import-file-input",
+      "enabled": false,
+      "sampleFileContent": "id,name\n1,e2e-test",
+      "successTestid": "import-success"
+    },
+    "upload": {
+      "route": "/documents/upload",
+      "sampleFileName": "e2e-test-upload.pdf",
+      "inputTestid": "file-upload-input",
+      "enabled": true,
+      "sampleFileContent": "E2E test file — safe to delete",
+      "successTestid": "upload-success"
+    },
+    "download": {
+      "triggerTestid": "download-btn",
+      "expectedFilenamePattern": "\\.(pdf|csv|xlsx|zip)$",
+      "enabled": false
+    }
+  },
+  "appName": "denovoai",
+  "apiEndpoints": [
+    {
+      "authedStatus": 200,
+      "description": "GET /api/apps/{id}",
+      "unauthStatus": 401,
+      "path": "/api/apps/{id}",
+      "method": "GET"
+    },
+    {
+      "authedStatus": 200,
+      "description": "GET /api/auth/callback",
+      "unauthStatus": 401,
+      "path": "/api/auth/callback",
+      "method": "GET"
+    },
+    {
+      "authedStatus": 200,
+      "description": "GET /api/denovo/assemble/{id}",
+      "unauthStatus": 401,
+      "path": "/api/denovo/assemble/{id}",
+      "method": "GET"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/denovo/assemble",
+      "unauthStatus": 401,
+      "path": "/api/denovo/assemble",
+      "method": "POST"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/denovo/parse",
+      "unauthStatus": 401,
+      "path": "/api/denovo/parse",
+      "method": "POST"
+    },
+    {
+      "authedStatus": 200,
+      "description": "GET /api/health",
+      "unauthStatus": 401,
+      "path": "/api/health",
+      "method": "GET"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/stripe/checkout",
+      "unauthStatus": 401,
+      "path": "/api/stripe/checkout",
+      "method": "POST"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/stripe/credits",
+      "unauthStatus": 401,
+      "path": "/api/stripe/credits",
+      "method": "POST"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/stripe/portal",
+      "unauthStatus": 401,
+      "path": "/api/stripe/portal",
+      "method": "POST"
+    },
+    {
+      "authedStatus": 201,
+      "description": "POST /api/stripe/webhook",
+      "unauthStatus": 401,
+      "path": "/api/stripe/webhook",
+      "method": "POST"
+    }
+  ],
+  "emailOperations": {
+    "otpFlow": {
+      "otpInputTestid": "otp-input",
+      "otpValue": "__MANUAL_CHECK__",
+      "emailInputTestid": "email-input",
+      "successRoute": "/dashboard",
+      "enabled": true
+    },
+    "inviteFlow": {
+      "successTestid": "invite-sent-toast",
+      "triggerTestid": "invite-user-btn",
+      "emailFieldTestid": "invite-email-input",
+      "testEmail": "e2e-invite@example.com",
+      "enabled": false
+    }
+  },
+  "pages": [
+    {
+      "expectedContentPattern": ".",
+      "path": "/auth/callback",
+      "requiresAuth": false
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/auth/login",
+      "requiresAuth": false
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/pricing",
+      "requiresAuth": false
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/privacy",
+      "requiresAuth": false
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/terms",
+      "requiresAuth": false
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/acceptable-use",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/admin",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/dashboard",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/dashboard/app/{id}",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/dashboard/billing",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/launch-policy",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/provider-policy",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/security",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/studio",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/studio/{id}",
+      "requiresAuth": true
+    },
+    {
+      "expectedContentPattern": ".",
+      "path": "/studio/confirm/{id}",
+      "requiresAuth": true
+    }
+  ],
+  "_generated": "auto-generated — review entity name, add data-testid attributes to app",
+  "entities": [
+    {
+      "apiSingleEndpoint": "/api/records/{id}",
+      "deleteButtonTestid": "delete-btn",
+      "name": "record",
+      "apiListEndpoint": "/api/records",
+      "editLinkTestid": "edit-link",
+      "createFields": [
+        {
+          "testid": "name-input",
+          "value": "E2E Test Record"
+        }
+      ],
+      "deleteConfirmTestid": "confirm-delete-btn",
+      "successMarkerTestid": "success-toast",
+      "listItemTestid": "record-row",
+      "submitButtonTestid": "submit-btn",
+      "listRoute": "/dashboard"
+    }
+  ],
+  "printOperations": {
+    "triggerTestid": "print-btn",
+    "enabled": false
+  },
+  "navigationLinks": [
+    {
+      "expectedRoute": "/auth/callback",
+      "testid": "nav-auth-callback",
+      "label": "Callback"
+    },
+    {
+      "expectedRoute": "/auth/login",
+      "testid": "nav-auth-login",
+      "label": "Login"
+    },
+    {
+      "expectedRoute": "/pricing",
+      "testid": "nav-pricing",
+      "label": "Pricing"
+    },
+    {
+      "expectedRoute": "/privacy",
+      "testid": "nav-privacy",
+      "label": "Privacy"
+    },
+    {
+      "expectedRoute": "/terms",
+      "testid": "nav-terms",
+      "label": "Terms"
+    },
+    {
+      "expectedRoute": "/",
+      "testid": "nav-home",
+      "label": "/Home"
+    },
+    {
+      "expectedRoute": "/acceptable-use",
+      "testid": "nav-acceptable-use",
+      "label": "Acceptable Use"
+    },
+    {
+      "expectedRoute": "/admin",
+      "testid": "nav-admin",
+      "label": "Admin"
+    },
+    {
+      "expectedRoute": "/login",
+      "testid": "nav-logout",
+      "label": "Logout"
+    }
+  ],
+  "authRoutes": [
+    {
+      "path": "/"
+    },
+    {
+      "path": "/acceptable-use"
+    },
+    {
+      "path": "/admin"
+    },
+    {
+      "path": "/dashboard"
+    },
+    {
+      "path": "/dashboard/app/{id}"
+    },
+    {
+      "path": "/dashboard/billing"
+    },
+    {
+      "path": "/launch-policy"
+    },
+    {
+      "path": "/provider-policy"
+    },
+    {
+      "path": "/security"
+    },
+    {
+      "path": "/studio"
+    }
+  ],
+  "criticalWorkflow": {
+    "name": "Create and verify record",
+    "completionMarkerTestid": "success-toast",
+    "completionMarkerText": "",
+    "steps": [
+      {
+        "action": "navigate",
+        "description": "Navigate to /dashboard",
+        "target": "/dashboard"
+      },
+      {
+        "action": "click",
+        "description": "Click new record button",
+        "testid": "new-record-btn"
+      },
+      {
+        "action": "fill",
+        "description": "Fill primary field",
+        "testid": "name-input",
+        "value": "E2E Test Record"
+      },
+      {
+        "action": "click",
+        "description": "Submit form",
+        "testid": "submit-btn"
+      }
+    ]
+  }
+}
