@@ -53,7 +53,7 @@ export default function AppDetailPage() {
       <Navbar />
       <main className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">&larr; Back to Dashboard</Link>
+          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground" data-testid="nav-dashboard">&larr; Back to Dashboard</Link>
 
           <div className="mt-4 flex items-center justify-between">
             <div>

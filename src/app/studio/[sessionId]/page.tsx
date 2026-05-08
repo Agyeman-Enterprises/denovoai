@@ -108,7 +108,7 @@ export default function SessionProgressPage() {
                   )}
                 </>
               )}
-              <Link href="/dashboard" className="flex-1">
+              <Link href="/dashboard" className="flex-1" data-testid="nav-dashboard">
                 <Button variant="secondary" className="w-full">Go to Dashboard</Button>
               </Link>
             </div>

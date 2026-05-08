@@ -185,7 +185,7 @@ export function MfaEnrollForm({ className, ...props }: React.ComponentPropsWitho
                 </InputOTPGroup>
               </InputOTP>
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading || code.length !== 6}>
+              <Button type="submit" className="w-full" disabled={isLoading || code.length !== 6} data-testid="submit-btn">
                 {isLoading ? 'Verifying…' : 'Enable authenticator'}
               </Button>
               <button
