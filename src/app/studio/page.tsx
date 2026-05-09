@@ -131,7 +131,7 @@ export default function StudioPage() {
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
               placeholder="Describe the app you want to build..."
               className="flex-1 rounded-xl border border-border bg-input px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              disabled={loading || stage === "confirming"}
+              disabled={loading || stage === "confirming"} data-testid="describe-the-app-you-want-to-build-input"
             />
             <Button
               onClick={handleSend}

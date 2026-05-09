@@ -1,0 +1,70 @@
+{
+  "appName": "denovoai",
+  "primaryEntity": {
+    "humanName": "Studio",
+    "createPath": "/studio",
+    "createTriggerText": "New Studio",
+    "listPath": "/studio",
+    "apiListEndpoint": "/api/studio",
+    "apiGetEndpoint": "/api/studio",
+    "fields": [
+      {
+        "selector": "[data-testid=\"describe-the-app-you-want-to-build-input\"]",
+        "testValue": "E2E Test Studio",
+        "updatedValue": "E2E Test Studio Updated",
+        "type": "text"
+      }
+    ],
+    "listTextMarker": "E2E Test Studio",
+    "editTriggerSelector": "[data-testid=\"edit-btn\"], [data-testid*=\"edit\"]",
+    "deleteTriggerSelector": "[data-testid=\"delete-btn\"], [data-testid*=\"delete\"]",
+    "deleteConfirmText": "Confirm"
+  },
+  "criticalFlow": {
+    "description": "Create a Studio",
+    "steps": [
+      {
+        "action": "goto",
+        "target": "/studio",
+        "description": "Navigate to Studio create page"
+      },
+      {
+        "action": "click",
+        "target": "button:has-text(\"New Studio\")",
+        "description": "Click New Studio button"
+      },
+      {
+        "action": "fill",
+        "target": "[data-testid=\"describe-the-app-you-want-to-build-input\"]",
+        "value": "E2E Test Studio",
+        "description": "Fill [data-testid=\"describe-the-app-you-want-to-build-input\"]"
+      },
+      {
+        "action": "click",
+        "target": "button[type=\"submit\"], button:has-text(\"Save\"), button:has-text(\"Create\"), button:has-text(\"Add\")",
+        "description": "Submit create form"
+      },
+      {
+        "action": "waitForText",
+        "target": "E2E Test Studio",
+        "description": "Studio appears in list"
+      }
+    ],
+    "completionMarker": "E2E Test Studio"
+  },
+  "authPaths": {
+    "login": "/auth/login",
+    "protected": "/studio"
+  },
+  "emptyStateText": "No Studios found",
+  "navLinks": [
+    "/",
+    "/auth/login",
+    "/studio",
+    "/acceptable-use",
+    "/admin",
+    "/dashboard",
+    "/launch-policy",
+    "/pricing"
+  ]
+}
