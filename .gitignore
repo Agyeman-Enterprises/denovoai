@@ -47,3 +47,9 @@ next-env.d.ts
 .claude/GATE_PASSED
 .claude/SCHEMA_READ
 .claude/TSC_PASSED
+.claude/GATES_PASSED
+.claude/AEGIS_ENROLLED
+.claude/OO_ACTIVE
+.claude/OO_PENDING.json
+.claude/VIOLATIONS.log
+.claude/skills/
