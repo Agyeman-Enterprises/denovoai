@@ -29,7 +29,7 @@ export function TrialBanner() {
           : `Trial ends in ${days} day${days === 1 ? '' : 's'}.`}
       </span>
       <Button size="sm" variant={urgent ? 'destructive' : 'default'} asChild>
-        <a href="/billing">Upgrade now</a>
+        <a href="/billing" data-testid="nav-billing">Upgrade now</a>
       </Button>
     </div>
   )

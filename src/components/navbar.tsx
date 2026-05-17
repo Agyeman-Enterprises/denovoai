@@ -72,7 +72,7 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/studio" className="inline-flex h-8 items-center rounded-lg px-4 text-xs font-semibold text-white" style={{ background: "#8B5CF6" }}>New App</Link>
+              <Link href="/studio" className="inline-flex h-8 items-center rounded-lg px-4 text-xs font-semibold text-white" style={{ background: "#8B5CF6" }} data-testid="nav-studio">New App</Link>
               <button onClick={handleLogout} className="text-xs text-white/30 hover:text-white/50 transition-colors">Sign Out</button>
             </>
           )}
