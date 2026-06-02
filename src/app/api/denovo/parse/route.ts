@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { callLiteLLM } from "@/lib/litellm";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { ChatMessage } from "@/types/denovo";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are DeNovo's Intent Parser. Your job is to understand what app a user wants to build and extract the information needed to generate it from a template.
 
@@ -104,20 +102,18 @@ export async function POST(request: Request) {
 
   const currentSlots = (session.slot_map as Record<string, unknown>) || {};
 
-  // Call Claude
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+  // Call LiteLLM — Tier 5 (sonnet) for agentic slot extraction
+  const assistantText = await callLiteLLM({
+    model: "claude-sonnet-4-6",
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
     messages: [
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: `Current conversation:\n${messages.map((m: ChatMessage) => `${m.role}: ${m.content}`).join("\n")}\n\nCurrent slots: ${JSON.stringify(currentSlots)}\n\nRespond in JSON only.`,
       },
     ],
   });
-
-  const assistantText = response.content[0].type === "text" ? response.content[0].text : "";
 
   let parsed: { message: string; slots?: Record<string, unknown>; stage: string };
   try {

@@ -31,9 +31,9 @@ export function Navbar() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "#8B5CF6" }}>
-              <span className="text-[10px] font-bold text-white">D</span>
+              <span className="text-[10px] font-bold text-white">AE</span>
             </div>
-            <span className="text-base font-bold text-white">DeNovo</span>
+            <span className="text-base font-bold text-white">AE Design Studio</span>
           </Link>
 
           {/* Public nav */}

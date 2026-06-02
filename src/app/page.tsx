@@ -76,7 +76,7 @@ function Terminal() {
           <div className="h-3 w-3 rounded-full" style={{ background: "#ff5f57" }} />
           <div className="h-3 w-3 rounded-full" style={{ background: "#ffbd2e" }} />
           <div className="h-3 w-3 rounded-full" style={{ background: "#28c840" }} />
-          <span className="ml-4 font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>DeNovo Studio</span>
+          <span className="ml-4 font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>AE Design Studio</span>
         </div>
         {/* Content */}
         <div className="px-6 py-5 font-mono text-[13px] leading-relaxed" style={{ minHeight: 340 }}>
@@ -192,7 +192,7 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={240}>
               <p className="mt-7 text-lg sm:text-xl leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                DeNovo turns a plain-English brief into production software.<br className="hidden sm:block" />
+                AE Design Studio turns an idea into designed, deployable software.<br className="hidden sm:block" />
                 Take the code, or let us run the product for you.
               </p>
             </Reveal>
@@ -233,7 +233,7 @@ export default function LandingPage() {
             <Reveal>
               <h2 className="text-3xl sm:text-5xl font-bold leading-tight">
                 Most tools generate output.<br />
-                <span style={{ color: "rgba(255,255,255,0.3)" }}>DeNovo delivers product.</span>
+                <span style={{ color: "rgba(255,255,255,0.3)" }}>AE Design Studio delivers product.</span>
               </h2>
             </Reveal>
             <Reveal delay={120}>
@@ -241,7 +241,7 @@ export default function LandingPage() {
                 Code alone is not the asset. A usable, launch-ready application is.
               </p>
               <p className="mt-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>
-                DeNovo is built for founders, operators, and agencies who want a faster path from concept to working software without turning every build into a custom engineering project.
+                AE Design Studio is built for founders, operators, and agencies who want a faster path from concept to working software without turning every build into a custom engineering project.
               </p>
             </Reveal>
             <Reveal delay={200}>
@@ -613,3 +613,4 @@ export default function LandingPage() {
     </>
   );
 }
+

@@ -72,10 +72,10 @@ export default function StudioPage() {
         if (data.stage) setStage(data.stage);
 
         if (data.stage === "confirming") {
-          // Navigate to confirmation screen
+          // Navigate to design canvas first
           setTimeout(() => {
-            router.push(`/studio/confirm/${sessionId}`);
-          }, 2000);
+            router.push(`/studio/${sessionId}/design`);
+          }, 1500);
         }
       }
     } catch {
@@ -113,7 +113,7 @@ export default function StudioPage() {
             {loading && (
               <div className="flex justify-start">
                 <div className="rounded-2xl bg-card border border-border px-4 py-3 text-sm text-muted-foreground">
-                  DeNovo is thinking...
+                  AE Design Studio is thinking...
                 </div>
               </div>
             )}
