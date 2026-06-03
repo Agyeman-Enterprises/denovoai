@@ -31,9 +31,12 @@ export async function enqueueAssembly(payload: AssemblyJobPayload): Promise<stri
   // raw bytes (our JSON) to the callback endpoint.
   const payloadB64 = Buffer.from(JSON.stringify(payload), "utf8").toString("base64");
 
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (process.env.AE_QUEUE_API_KEY) headers.Authorization = `Bearer ${process.env.AE_QUEUE_API_KEY}`;
+
   const res = await fetch(`${base.replace(/\/$/, "")}/enqueue`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     cache: "no-store",
     body: JSON.stringify({
       Queue: process.env.AE_QUEUE_NAME ?? "ae-design-studio",
