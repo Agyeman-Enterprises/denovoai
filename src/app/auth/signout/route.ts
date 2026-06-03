@@ -11,7 +11,8 @@ import { REFRESH_COOKIE } from "@/lib/oidc";
 
 export async function POST(request: NextRequest) {
   const origin = new URL(request.url).origin;
-  const res = NextResponse.redirect(`${origin}/`, { status: 302 });
+  const base = (process.env.NEXT_PUBLIC_APP_URL || process.env.AE_INTERNAL_URL || origin).replace(/\/$/, "");
+  const res = NextResponse.redirect(`${base}/`, { status: 302 });
   for (const name of [SESSION_COOKIE, REFRESH_COOKIE]) {
     res.cookies.set(name, "", { path: "/", maxAge: 0 });
   }

@@ -30,6 +30,9 @@ function clearTemp(res: NextResponse) {
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
+  // Behind the Traefik/tunnel proxy, request.url's origin is the internal
+  // container host. Build browser redirects on the public app URL instead.
+  const base = (process.env.NEXT_PUBLIC_APP_URL || process.env.AE_INTERNAL_URL || origin).replace(/\/$/, "");
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const oauthError = searchParams.get("error");
@@ -40,7 +43,7 @@ export async function GET(request: NextRequest) {
   const next = jar.get(OAUTH_RETURN_COOKIE)?.value || "/dashboard";
 
   const fail = (reason: string) => {
-    const r = NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(reason)}`);
+    const r = NextResponse.redirect(`${base}/auth/login?error=${encodeURIComponent(reason)}`);
     clearTemp(r);
     return r;
   };
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
     return fail("exchange_failed");
   }
 
-  const res = NextResponse.redirect(`${origin}${next.startsWith("/") ? next : "/dashboard"}`);
+  const res = NextResponse.redirect(`${base}${next.startsWith("/") ? next : "/dashboard"}`);
   const secure = process.env.NODE_ENV === "production";
   res.cookies.set(SESSION_COOKIE, accessToken, {
     httpOnly: true,
