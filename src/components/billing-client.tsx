@@ -48,7 +48,7 @@ export function BillingClient({ sub, plan }: { sub: Subscription | null; plan: P
             ))}
           </nav>
         </div>
-        <Link href="/studio" style={{ background: orange, color: "#fff", padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>New Project</Link>
+        <Link href="/studio" style={{ background: orange, color: "#fff", padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: "none" }} data-testid="nav-studio">New Project</Link>
       </header>
 
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "clamp(32px,5vw,52px) clamp(20px,4vw,48px)" }}>

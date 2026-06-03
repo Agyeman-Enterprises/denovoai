@@ -73,8 +73,8 @@ export default function StudioPage() {
           <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>AE Studio</span>
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <Link href="/dashboard" style={{ fontSize: 13, color: muted, textDecoration: "none" }}>Dashboard</Link>
-          <Link href="/studio" style={{ background: orange, color: "#fff", padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>New Project</Link>
+          <Link href="/dashboard" style={{ fontSize: 13, color: muted, textDecoration: "none" }} data-testid="nav-dashboard">Dashboard</Link>
+          <Link href="/studio" style={{ background: orange, color: "#fff", padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: "none" }} data-testid="nav-studio">New Project</Link>
         </div>
       </header>
 

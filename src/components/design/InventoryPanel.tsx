@@ -64,7 +64,7 @@ export function InventoryPanel({ screens, onScreensChange, onGenerate, generatin
               <select
                 value={screen.screen_type}
                 onChange={e => updateScreen(i, { screen_type: e.target.value as ScreenSpec["screen_type"] })}
-                className="shrink-0 rounded border border-border bg-background px-1.5 py-1 text-xs text-muted-foreground focus:outline-none"
+                className="shrink-0 rounded border border-border bg-background px-1.5 py-1 text-xs text-muted-foreground focus:outline-none" data-testid="select-input"
               >
                 {TYPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>

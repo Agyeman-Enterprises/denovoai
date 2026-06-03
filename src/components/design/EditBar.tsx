@@ -45,7 +45,7 @@ export function EditBar({ variantId, onEdit, disabled }: Props) {
             onKeyDown={e => e.key === "Enter" && handleCustom()}
             placeholder="Describe what to change..."
             autoFocus
-            className="flex-1 rounded-lg border border-border bg-input px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="flex-1 rounded-lg border border-border bg-input px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" data-testid="describe-what-to-change-input"
           />
           <button
             onClick={handleCustom}

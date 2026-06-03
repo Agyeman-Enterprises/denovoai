@@ -35,7 +35,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <Link href="/studio" data-testid="nav-studio" style={{ background: orange, color: "#fff", padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: "none" }}>New Project</Link>
           <form action="/auth/signout" method="post" style={{ display: "inline" }}>
-            <button type="submit" style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: muted }}>Sign Out</button>
+            <button type="submit" style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: muted }} data-testid="submit-btn">Sign Out</button>
           </form>
         </div>
       </header>

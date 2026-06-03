@@ -50,7 +50,7 @@ export function DesignPromptBar({ onAdd, disabled }: Props) {
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
             placeholder="Add a screen... e.g. mobile variant of the checkout"
             disabled={disabled}
-            className="flex-1 rounded-xl border border-border bg-input px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            className="flex-1 rounded-xl border border-border bg-input px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50" data-testid="add-a-screen-eg-mobile-variant-of-the-checkout-input"
           />
           <button
             onClick={handleSubmit}

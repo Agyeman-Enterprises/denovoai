@@ -50,7 +50,7 @@ export default async function DashboardPage() {
             <p style={{ fontSize: 14, color: muted, margin: "0 0 28px", maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
               Describe your idea and we&apos;ll design and build it for you.
             </p>
-            <Link href="/studio" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: orange, color: "#fff", padding: "12px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+            <Link href="/studio" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: orange, color: "#fff", padding: "12px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }} data-testid="nav-studio">
               Build your first project
             </Link>
           </div>

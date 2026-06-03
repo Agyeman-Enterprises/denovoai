@@ -116,7 +116,7 @@ export default function LoginPage() {
           {mode === "signup" && (
             <div>
               <label style={labelStyle}>Confirm Password</label>
-              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} style={inputStyle} />
+              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} style={inputStyle} data-testid="password-input" />
             </div>
           )}
 

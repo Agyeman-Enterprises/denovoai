@@ -54,7 +54,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </Link>
         ))}
         <div style={{ marginTop: "auto", paddingTop: 16, borderTop: `1px solid ${border}` }}>
-          <Link href="/dashboard" style={{ display: "block", padding: "7px 10px", fontSize: 13, color: muted, textDecoration: "none" }}>← Back to Dashboard</Link>
+          <Link href="/dashboard" style={{ display: "block", padding: "7px 10px", fontSize: 13, color: muted, textDecoration: "none" }} data-testid="nav-dashboard">← Back to Dashboard</Link>
         </div>
       </nav>
 
