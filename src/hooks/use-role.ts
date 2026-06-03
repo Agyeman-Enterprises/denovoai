@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import type { AppRole } from '@/lib/rbac-server'
 
 interface UseRoleResult {
@@ -22,59 +21,31 @@ const ROLE_HIERARCHY: Record<AppRole, number> = {
 }
 
 /**
- * Client-side hook to get the current user's role.
+ * Client-side hook for the current user's global role (via /api/auth/me).
  *
  * @example
  *   const { isAdmin } = useRole()
- *   const { role } = useRole({ orgId: org.id })
  */
-export function useRole(options: { orgId?: string } = {}): UseRoleResult {
-  const { orgId } = options
+export function useRole(): UseRoleResult {
   const [role, setRole] = useState<AppRole | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-
-    async function fetchRole() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        if (!cancelled) { setRole(null); setLoading(false) }
-        return
-      }
-
-      let query = supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-
-      if (orgId) {
-        query = query.eq('org_id', orgId) as typeof query
-      } else {
-        query = query.is('org_id', null) as typeof query
-      }
-
-      const { data } = await query
-
-      if (cancelled) return
-
-      if (!data?.length) {
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d: { user: { role: AppRole | null } | null }) => {
+        if (cancelled) return
+        setRole(d.user?.role ?? null)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
         setRole(null)
-      } else {
-        const best = data.reduce<AppRole>((acc, row) => {
-          const r = row.role as AppRole
-          return ROLE_HIERARCHY[r] > ROLE_HIERARCHY[acc] ? r : acc
-        }, 'viewer')
-        setRole(best)
-      }
-      setLoading(false)
-    }
-
-    fetchRole()
+        setLoading(false)
+      })
     return () => { cancelled = true }
-  }, [orgId])
+  }, [])
 
   const hasRoleFn = (minimum: AppRole) =>
     role !== null && ROLE_HIERARCHY[role] >= ROLE_HIERARCHY[minimum]

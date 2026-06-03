@@ -138,6 +138,13 @@ export const subscriptions = {
   async getByUser(userId: string): Promise<Subscription | null> {
     return one(await sql<Subscription[]>`SELECT * FROM subscriptions WHERE user_id = ${userId}`);
   },
+  /** JIT-provision a default free subscription on first login. Idempotent. */
+  async ensure(userId: string): Promise<void> {
+    await sql`
+      INSERT INTO subscriptions (user_id, plan_id)
+      VALUES (${userId}, 'free')
+      ON CONFLICT (user_id) DO NOTHING`;
+  },
   /** Atomic credit decrement — only succeeds if the user has credits left. */
   async tryConsumeCredit(userId: string): Promise<boolean> {
     const rows = await sql`

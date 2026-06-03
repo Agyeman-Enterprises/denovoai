@@ -1,34 +1,28 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
-import type { User } from "@supabase/supabase-js";
 
 const orange = "#F5530A";
 const border = "rgba(255,255,255,0.07)";
 const muted  = "rgba(255,255,255,0.45)";
 
+interface MeUser { id: string; email: string | null; role: string | null }
+
 export function Navbar() {
   const pathname = usePathname();
-  const router   = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
+  const [user, setUser] = useState<MeUser | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
+    let cancelled = false;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { user: MeUser | null }) => { if (!cancelled) setUser(d.user); })
+      .catch(() => { if (!cancelled) setUser(null); });
+    return () => { cancelled = true; };
+  }, [pathname]);
 
   return (
     <nav style={{
@@ -98,10 +92,12 @@ export function Navbar() {
                 padding: "8px 20px", borderRadius: 8,
                 fontSize: 13, fontWeight: 700, textDecoration: "none",
               }}>New project</Link>
-              <button onClick={handleLogout} style={{
-                background: "transparent", border: "none",
-                cursor: "pointer", fontSize: 13, color: muted,
-              }}>Sign Out</button>
+              <form action="/auth/signout" method="post" style={{ margin: 0 }}>
+                <button type="submit" data-testid="sign-out" style={{
+                  background: "transparent", border: "none",
+                  cursor: "pointer", fontSize: 13, color: muted,
+                }}>Sign Out</button>
+              </form>
             </>
           )}
         </div>

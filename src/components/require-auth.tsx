@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 interface RequireAuthProps {
   /** Route to redirect unauthenticated users. Default: /auth/login */
@@ -13,14 +12,9 @@ interface RequireAuthProps {
 }
 
 /**
- * Client-side route guard. Redirects to `redirectTo` if no active session.
- * Use in pages that need client-side protection (e.g., inside client components).
- * For server-side protection, use the server layout guard pattern instead.
- *
- * @example
- * export default function DashboardPage() {
- *   return <RequireAuth><Dashboard /></RequireAuth>
- * }
+ * Client-side route guard. Redirects to `redirectTo` if there is no active
+ * session (checked via /api/auth/me). For server-side protection prefer the
+ * middleware + `requireAuthServer` layout pattern.
  */
 export function RequireAuth({
   redirectTo = '/auth/login',
@@ -32,17 +26,24 @@ export function RequireAuth({
   const router = useRouter()
 
   useEffect(() => {
-    async function check() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+    let cancelled = false
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d: { user: unknown | null }) => {
+        if (cancelled) return
+        if (d.user) {
+          setAuthenticated(true)
+        } else {
+          router.replace(redirectTo)
+        }
+        setChecked(true)
+      })
+      .catch(() => {
+        if (cancelled) return
         router.replace(redirectTo)
-      } else {
-        setAuthenticated(true)
-      }
-      setChecked(true)
-    }
-    check()
+        setChecked(true)
+      })
+    return () => { cancelled = true }
   }, [router, redirectTo])
 
   if (!checked || !authenticated) return <>{fallback}</>
