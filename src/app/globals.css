@@ -1,100 +1,144 @@
 @import "tailwindcss";
 
+/* ── Design tokens ─────────────────────────────── */
 :root {
-  --background: #0A0A0F;
-  --foreground: #e4e4f0;
-  --card: #0f0f1e;
-  --card-foreground: #e4e4f0;
-  --border: #1a1a35;
-  --input: #1a1a35;
-  --primary: #8B5CF6;
+  /* Brand */
+  --coral:   #F5530A;
+  --coral-light: #F97316;
+
+  /* Dark mode (default) */
+  --bg:           #08080D;
+  --bg-card:      #0F0F18;
+  --bg-subtle:    #0A0A12;
+  --border:       rgba(255,255,255,0.07);
+  --border-hover: rgba(245,83,10,0.3);
+  --foreground:   #FFFFFF;
+  --muted:        rgba(255,255,255,0.4);
+  --dimmed:       rgba(255,255,255,0.18);
+
+  /* Legacy Tailwind compat */
+  --background:         var(--bg);
+  --card:               var(--bg-card);
+  --card-foreground:    var(--foreground);
+  --input:              var(--bg-card);
+  --primary:            var(--coral);
   --primary-foreground: #ffffff;
-  --secondary: #151528;
-  --secondary-foreground: #e4e4f0;
-  --muted: #0c0c1a;
-  --muted-foreground: #7a7a9e;
-  --accent: #8B5CF6;
-  --destructive: #ef4444;
-  --ring: #8B5CF6;
-  --radius: 0.75rem;
+  --secondary:          var(--bg-subtle);
+  --secondary-foreground: var(--foreground);
+  --muted-foreground:   rgba(255,255,255,0.4);
+  --accent:             var(--coral);
+  --destructive:        #ef4444;
+  --ring:               var(--coral);
+  --radius:             0.75rem;
+  --font-sans:          var(--font-geist-sans);
+  --font-mono:          var(--font-geist-mono);
+}
+
+/* ── Light mode ─────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root.light, [data-theme="light"] {
+    --bg:           #F8F7F4;
+    --bg-card:      #FFFFFF;
+    --bg-subtle:    #F0EEE9;
+    --border:       rgba(0,0,0,0.08);
+    --border-hover: rgba(245,83,10,0.3);
+    --foreground:   #0A0A10;
+    --muted:        rgba(10,10,16,0.45);
+    --dimmed:       rgba(10,10,16,0.25);
+
+    --background:   var(--bg);
+    --card:         var(--bg-card);
+    --card-foreground: var(--foreground);
+    --muted-foreground: rgba(10,10,16,0.45);
+  }
+}
+
+[data-theme="light"] {
+  --bg:           #F8F7F4;
+  --bg-card:      #FFFFFF;
+  --bg-subtle:    #F0EEE9;
+  --border:       rgba(0,0,0,0.08);
+  --border-hover: rgba(245,83,10,0.3);
+  --foreground:   #0A0A10;
+  --muted:        rgba(10,10,16,0.45);
+  --dimmed:       rgba(10,10,16,0.25);
+  --background:   var(--bg);
+  --card:         var(--bg-card);
+  --card-foreground: var(--foreground);
+  --muted-foreground: rgba(10,10,16,0.45);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-primary: var(--primary);
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-primary:            var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
+  --color-secondary:          var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-destructive: var(--destructive);
-  --color-ring: var(--ring);
-  --radius: var(--radius);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted:              var(--bg-subtle);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-destructive:        var(--destructive);
+  --color-ring:               var(--ring);
+  --radius:                   var(--radius);
+  --font-sans:                var(--font-geist-sans);
+  --font-mono:                var(--font-geist-mono);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── Reset ─────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  color-scheme: dark;
+  color-scheme: dark light;
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background: var(--bg);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Section divider — gradient line */
-.section-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
-  margin: 0 auto;
-  max-width: 80%;
-}
-
-/* Card hover glow */
-.card-glow {
-  transition: all 0.3s ease;
-}
+/* ── Utility ────────────────────────────────────── */
+.card-glow { transition: border-color 0.25s, box-shadow 0.25s; }
 .card-glow:hover {
-  border-color: rgba(139, 92, 246, 0.3);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.06), inset 0 1px 0 rgba(255,255,255,0.03);
+  border-color: rgba(245,83,10,0.25) !important;
+  box-shadow: 0 0 28px rgba(245,83,10,0.06);
 }
 
-/* CTA glow */
-.cta-glow {
-  transition: all 0.3s ease;
-}
+.cta-glow { transition: box-shadow 0.25s, transform 0.2s; }
 .cta-glow:hover {
-  box-shadow: 0 0 40px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 0 36px rgba(245,83,10,0.35);
+  transform: translateY(-1px);
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ── Animations ─────────────────────────────────── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
 }

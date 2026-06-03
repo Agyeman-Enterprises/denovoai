@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/server";
+import { sql, audit } from "@/lib/db";
 import type { AuditOperation, AuditEntry } from "../types/audit";
 
 export async function writeAuditLog(
@@ -9,8 +9,7 @@ export async function writeAuditLog(
   newData: Record<string, unknown> | null,
   changedBy: string | null
 ): Promise<void> {
-  const supabase = createServiceClient();
-  await supabase.from("audit_log").insert({
+  await audit.log({
     table_name: tableName,
     row_id: rowId,
     operation,
@@ -24,13 +23,9 @@ export async function getAuditLog(
   tableName: string,
   rowId: string
 ): Promise<AuditEntry[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("audit_log")
-    .select("*")
-    .eq("table_name", tableName)
-    .eq("row_id", rowId)
-    .order("changed_at", { ascending: false });
-  if (error) throw new Error(`Audit log query failed: ${error.message}`);
-  return (data ?? []) as AuditEntry[];
+  const rows = await sql<AuditEntry[]>`
+    SELECT * FROM audit_log
+    WHERE table_name = ${tableName} AND row_id = ${rowId}
+    ORDER BY changed_at DESC`;
+  return rows as AuditEntry[];
 }

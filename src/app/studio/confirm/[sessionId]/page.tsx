@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,7 +19,6 @@ export default function ConfirmPage() {
   const router = useRouter();
   const params = useParams();
   const sessionId = params.sessionId as string;
-  const supabase = createClient();
   const [slots, setSlots] = useState<Partial<SlotMap> | null>(null);
   const [screens, setScreens] = useState<DesignScreen[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,17 +26,11 @@ export default function ConfirmPage() {
 
   useEffect(() => {
     async function loadSession() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/auth/login"); return; }
-
-      const { data: session } = await supabase
-        .from("sessions")
-        .select("slot_map")
-        .eq("id", sessionId)
-        .single();
-
-      if (session?.slot_map) {
-        setSlots(session.slot_map as Partial<SlotMap>);
+      // Auth enforced by middleware; this just loads data.
+      const sessRes = await fetch(`/api/sessions/${sessionId}`);
+      if (sessRes.ok) {
+        const session = await sessRes.json();
+        if (session?.slot_map) setSlots(session.slot_map as Partial<SlotMap>);
       }
 
       // Load design screens if available
@@ -51,37 +43,30 @@ export default function ConfirmPage() {
       setLoading(false);
     }
     loadSession();
-  }, [sessionId, supabase, router]);
+  }, [sessionId]);
 
   const handleBuild = async (outputType: "deploy" | "download") => {
     setAssembling(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Create app record
+    // Create app record (server creates it for the authed user + links the session)
     const slug = (slots?.APP_NAME || "app").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const { data: app } = await supabase
-      .from("apps")
-      .insert({
-        user_id: user.id,
+    const createRes = await fetch("/api/apps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         name: slots?.APP_NAME || "Untitled App",
         slug,
         template: slots?.TEMPLATE || "saas",
         slot_map: slots || {},
         snippets: slots?.SNIPPETS || [],
         output_type: outputType,
-      })
-      .select()
-      .single();
+        sessionId,
+      }),
+    });
 
+    if (!createRes.ok) { setAssembling(false); return; }
+    const { app } = await createRes.json();
     if (!app) { setAssembling(false); return; }
-
-    // Link session to app
-    await supabase
-      .from("sessions")
-      .update({ app_id: app.id, stage: "assembling" })
-      .eq("id", sessionId);
 
     // Trigger assembly
     const res = await fetch("/api/denovo/assemble", {

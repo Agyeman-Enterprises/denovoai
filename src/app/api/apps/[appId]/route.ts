@@ -1,25 +1,22 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { apps } from "@/lib/db";
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from "@/lib/session";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ appId: string }> }
+  { params }: { params: Promise<{ appId: string }> },
 ) {
   const { appId } = await params;
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
   }
 
-  const { data: app } = await supabase
-    .from("apps")
-    .select("*")
-    .eq("id", appId)
-    .eq("user_id", user.id)
-    .single();
-
+  const app = await apps.getForUser(appId, userId);
   if (!app) {
     return NextResponse.json({ error: "App not found" }, { status: 404 });
   }
@@ -29,24 +26,21 @@ export async function GET(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ appId: string }> }
+  { params }: { params: Promise<{ appId: string }> },
 ) {
   const { appId } = await params;
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
   }
 
-  const { error } = await supabase
-    .from("apps")
-    .delete()
-    .eq("id", appId)
-    .eq("user_id", user.id);
-
-  if (error) {
-    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+  const deleted = await apps.deleteForUser(appId, userId);
+  if (!deleted) {
+    return NextResponse.json({ error: "App not found" }, { status: 404 });
   }
 
   return NextResponse.json({ deleted: true });

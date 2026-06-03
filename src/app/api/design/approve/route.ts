@@ -1,23 +1,25 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sessions } from '@/lib/db';
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from '@/lib/session';
 import { extractSlotmapFromScreens } from '@/lib/generation/extract-slotmap';
 
 export async function POST(request: Request) {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
+  }
 
   const { sessionId } = await request.json();
   if (!sessionId) return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
 
-  // Load existing slot_map
-  const { data: session } = await supabase
-    .from('sessions')
-    .select('slot_map')
-    .eq('id', sessionId)
-    .single();
+  // Load existing slot_map (scoped to user)
+  const session = await sessions.getForUser(sessionId, userId);
+  if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 
-  const existingSlots = (session?.slot_map as Record<string, unknown>) ?? {};
+  const existingSlots = (session.slot_map as Record<string, unknown>) ?? {};
 
   // Extract design insights from generated screens (non-blocking — empty result is fine)
   const designSlots = await extractSlotmapFromScreens(sessionId).catch(() => ({}));
@@ -40,10 +42,7 @@ export async function POST(request: Request) {
     SCHEMA_EXTRAS: mergedExtras.length > 0 ? mergedExtras : existingSlots['SCHEMA_EXTRAS'],
   };
 
-  await supabase
-    .from('sessions')
-    .update({ slot_map: mergedSlots, stage: 'confirming', updated_at: new Date().toISOString() })
-    .eq('id', sessionId);
+  await sessions.updateForUser(sessionId, userId, { slot_map: mergedSlots, stage: 'confirming' });
 
   return NextResponse.json({ ok: true, nextStep: `/studio/confirm/${sessionId}`, slots: mergedSlots });
 }

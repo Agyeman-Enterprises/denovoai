@@ -1,5 +1,5 @@
 import { callLiteLLM } from '@/lib/litellm';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sql } from '@/lib/db';
 import { Client as MinioClient } from 'minio';
 import type { SlotMap } from '@/types/denovo';
 
@@ -24,18 +24,18 @@ async function readFromMinio(bucket: string, path: string): Promise<string> {
 }
 
 export async function extractSlotmapFromScreens(sessionId: string): Promise<Partial<SlotMap>> {
-  const supabase = await createServerSupabase();
   const bucket = process.env.MINIO_BUCKET_DESIGNS ?? 'ae-design-screens';
 
-  // Load active variants for this session (up to 6 screens — enough context without blowing the token budget)
-  const { data: variants } = await supabase
-    .schema('design')
-    .from('variants')
-    .select('storage_path, screens(name, screen_type)')
-    .eq('is_active', true)
-    .limit(6);
+  // Active variants for THIS session (scoped via screens.session_id — fixes a
+  // prior bug where this pulled active variants across all sessions). Up to 6.
+  const variants = await sql<{ storage_path: string; screen_name: string }[]>`
+    SELECT v.storage_path, s.name AS screen_name
+    FROM design.variants v
+    JOIN design.screens s ON s.id = v.screen_id
+    WHERE s.session_id = ${sessionId} AND v.is_active = true
+    LIMIT 6`;
 
-  if (!variants || variants.length === 0) return {};
+  if (variants.length === 0) return {};
 
   // Read TSX content for each variant
   const screenSamples: string[] = [];
@@ -43,10 +43,8 @@ export async function extractSlotmapFromScreens(sessionId: string): Promise<Part
     if (!v.storage_path) continue;
     try {
       const code = await readFromMinio(bucket, v.storage_path);
-      const screensVal = v.screens as unknown;
-      const screenName = (screensVal as { name: string } | null)?.name ?? 'screen';
       // Trim to first 800 chars per screen — enough for color/structure analysis
-      screenSamples.push(`=== ${screenName} ===\n${code.slice(0, 800)}`);
+      screenSamples.push(`=== ${v.screen_name} ===\n${code.slice(0, 800)}`);
     } catch {
       // MinIO read failed — skip this screen
     }

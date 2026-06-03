@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sessions } from '@/lib/db';
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from '@/lib/session';
 import { generateInventory } from '@/lib/generation/inventory';
 
 export async function POST(request: Request) {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
+  }
 
   const { sessionId } = await request.json();
   if (!sessionId) return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
 
-  const { data: session } = await supabase
-    .from('sessions')
-    .select('slot_map, messages')
-    .eq('id', sessionId)
-    .single();
-
+  const session = await sessions.getForUser(sessionId, userId);
   if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 
   const slotMap = (session.slot_map as Record<string, unknown>) ?? {};

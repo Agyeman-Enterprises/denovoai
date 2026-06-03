@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import fs from "fs/promises";
-import { createServiceClient } from "@/lib/supabase/server";
-import type { JobStage } from "@/types/database";
+import { sql } from "@/lib/db";
+import type { AssembleStage } from "@/types/db";
 import type { SlotMap } from "@/types/denovo";
 import { cloneTemplate } from "./clone";
 import { substituteTokens } from "./substitute";
@@ -11,35 +11,20 @@ import { generateEnvFile } from "./env";
 import { deployToGitea } from "./deploy";
 import { packageDownload } from "./download";
 
-// Safe log append — reads current array, appends, writes back
-// No RPC used (append_job_log does not exist in this schema)
+// Atomic log append (array_append — no read-modify-write race).
 async function appendLog(jobId: string, entry: string): Promise<void> {
-  const db = createServiceClient();
-  const { data } = await db
-    .from("assemble_jobs")
-    .select("log")
-    .eq("id", jobId)
-    .single();
-
-  const current = data?.log ?? [];
-  await db
-    .from("assemble_jobs")
-    .update({ log: [...current, entry], updated_at: new Date().toISOString() })
-    .eq("id", jobId);
+  await sql`
+    UPDATE assemble_jobs SET log = array_append(log, ${entry}), updated_at = now()
+    WHERE id = ${jobId}`;
 }
 
 async function setStage(
   jobId: string,
-  stage: JobStage,
+  stage: AssembleStage,
   progress: number,
-  logEntry?: string
+  logEntry?: string,
 ): Promise<void> {
-  const db = createServiceClient();
-  await db
-    .from("assemble_jobs")
-    .update({ stage, progress, updated_at: new Date().toISOString() })
-    .eq("id", jobId);
-
+  await sql`UPDATE assemble_jobs SET stage = ${stage}, progress = ${progress}, updated_at = now() WHERE id = ${jobId}`;
   if (logEntry) await appendLog(jobId, logEntry);
 }
 
@@ -52,7 +37,6 @@ export async function runAssembly(
   // workdir is built from randomUUID() — not a user parameter — safe for path ops
   const uuid = randomUUID();
   const workdir = `/tmp/denovo/${uuid}`;
-  const db = createServiceClient();
 
   try {
     // Step 1: Clone
@@ -96,48 +80,28 @@ export async function runAssembly(
     }
 
     // Mark job done
-    await db
-      .from("assemble_jobs")
-      .update({
-        stage: "done",
-        progress: 100,
-        result,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", jobId);
+    await sql`
+      UPDATE assemble_jobs SET stage = 'done', progress = 100, result = ${sql.json(result as never)}, updated_at = now()
+      WHERE id = ${jobId}`;
 
     // Update app record
-    await db
-      .from("apps")
-      .update({
-        status: outputType === "deploy" ? "deploying" : "downloaded",
-        ...(result.type === "deploy"
-          ? {
-              gitea_repo_url: result.giteaUrl ?? null,
-              coolify_app_id: result.coolifyAppId ?? null,
-              coolify_domain: result.domain ?? null,
-            }
-          : {
-              download_url: result.downloadUrl ?? null,
-              download_expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
-            }),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", appId);
+    const appPatch: Record<string, unknown> =
+      result.type === "deploy"
+        ? {
+            status: "deploying",
+            gitea_repo_url: result.giteaUrl ?? null,
+            coolify_app_id: result.coolifyAppId ?? null,
+            coolify_domain: result.domain ?? null,
+          }
+        : {
+            status: "downloaded",
+            download_url: result.downloadUrl ?? null,
+            download_expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
+          };
+    await sql`UPDATE apps SET ${sql(appPatch)}, updated_at = now() WHERE id = ${appId}`;
   } catch (error) {
-    await db
-      .from("assemble_jobs")
-      .update({
-        stage: "error",
-        error: String(error),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", jobId);
-
-    await db
-      .from("apps")
-      .update({ status: "failed", error_message: String(error) })
-      .eq("id", appId);
+    await sql`UPDATE assemble_jobs SET stage = 'error', error = ${String(error)}, updated_at = now() WHERE id = ${jobId}`;
+    await sql`UPDATE apps SET status = 'failed', error_message = ${String(error)}, updated_at = now() WHERE id = ${appId}`;
   } finally {
     await fs.rm(workdir, { recursive: true, force: true });
   }

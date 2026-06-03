@@ -1,4 +1,4 @@
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sql } from '@/lib/db';
 import { generateInventory } from './inventory';
 import { generateScreen } from './generate-screen';
 import { retrieveDesignTokens } from '@/lib/design-memory/design-retrieval';
@@ -31,19 +31,14 @@ function slotMapToProductSpec(template: string): ProductSpec {
 }
 
 export async function generateAllScreens(sessionId: string): Promise<GenerationProgress> {
-  const supabase = await createServerSupabase();
+  // Load session (service context — caller already verified ownership)
+  const sessionRows = await sql<{ slot_map: Record<string, unknown>; messages: Array<{ role: string; content: string }> }[]>`
+    SELECT slot_map, messages FROM sessions WHERE id = ${sessionId}`;
+  const session = sessionRows[0];
+  if (!session) throw new Error(`generateAllScreens: session ${sessionId} not found`);
 
-  // Load session
-  const { data: session, error: sessionError } = await supabase
-    .from('sessions')
-    .select('slot_map, messages')
-    .eq('id', sessionId)
-    .single();
-
-  if (sessionError || !session) throw new Error(`generateAllScreens: session ${sessionId} not found`);
-
-  const slotMap = (session.slot_map as Record<string, unknown>) ?? {};
-  const messages = (session.messages as Array<{ role: string; content: string }>) ?? [];
+  const slotMap = session.slot_map ?? {};
+  const messages = session.messages ?? [];
 
   // Build app description from slot map + conversation
   const appName    = String(slotMap['APP_NAME'] ?? 'My App');
@@ -61,26 +56,20 @@ export async function generateAllScreens(sessionId: string): Promise<GenerationP
   // Stage 1: generate screen inventory (Tier 2 — cheap)
   const specs: ScreenSpec[] = await generateInventory(appDesc, userMsgs);
 
-  // Insert screen rows
-  const { data: insertedScreens, error: insertError } = await supabase
-    .schema('design')
-    .from('screens')
-    .insert(
-      specs.map((s, i) => ({
-        session_id:  sessionId,
-        name:        s.name,
-        purpose:     s.purpose,
-        screen_type: s.screen_type,
-        position:    i,
-      }))
-    )
-    .select('id, name');
+  // Insert screen rows (bulk)
+  const screenRows = specs.map((s, i) => ({
+    session_id:  sessionId,
+    name:        s.name,
+    purpose:     s.purpose,
+    screen_type: s.screen_type,
+    position:    i,
+  }));
+  const insertedScreens = await sql<{ id: string; name: string }[]>`
+    INSERT INTO design.screens ${sql(screenRows)} RETURNING id, name`;
 
-  if (insertError || !insertedScreens) throw new Error(`generateAllScreens: screen insert failed: ${insertError?.message}`);
+  if (insertedScreens.length === 0) throw new Error(`generateAllScreens: screen insert failed`);
 
-  const screenMap = new Map<string, string>(
-    (insertedScreens as Array<{ id: string; name: string }>).map(s => [s.name, s.id])
-  );
+  const screenMap = new Map<string, string>(insertedScreens.map((s) => [s.name, s.id]));
 
   // Fetch trawl-grounded design tokens (null-safe — falls back to defaults)
   const productSpec = slotMapToProductSpec(template);
@@ -117,10 +106,7 @@ export async function generateAllScreens(sessionId: string): Promise<GenerationP
   );
 
   // Advance session stage to 'design'
-  await supabase
-    .from('sessions')
-    .update({ stage: 'design', updated_at: new Date().toISOString() })
-    .eq('id', sessionId);
+  await sql`UPDATE sessions SET stage = 'design', updated_at = now() WHERE id = ${sessionId}`;
 
   return progress;
 }

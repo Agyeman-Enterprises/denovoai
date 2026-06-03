@@ -1,5 +1,5 @@
 import { callLiteLLM } from '@/lib/litellm';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sql } from '@/lib/db';
 import { SCREEN_GENERATION_SYSTEM_PROMPT } from './system-prompt';
 import type { ScreenSpec } from './inventory';
 import type { DesignTokens } from '@/lib/trawl/types';
@@ -101,26 +101,16 @@ export async function generateScreen(
   await minio.putObject(bucket, storagePath, buf, buf.length, { 'Content-Type': 'text/plain' });
 
   // Insert variant row
-  const supabase = await createServerSupabase();
-  const { data: variant, error } = await supabase
-    .schema('design')
-    .from('variants')
-    .insert({
-      screen_id:    screenId,
-      storage_path: storagePath,
-      html_preview: htmlPreview,
-      is_active:    true,
-      prompt_used:  prompt,
-      model_used:   'claude-sonnet-4-6',
-    })
-    .select('id')
-    .single();
+  const variantRows = await sql<{ id: string }[]>`
+    INSERT INTO design.variants (screen_id, storage_path, html_preview, is_active, prompt_used, model_used)
+    VALUES (${screenId}, ${storagePath}, ${htmlPreview}, true, ${prompt}, 'claude-sonnet-4-6')
+    RETURNING id`;
 
-  if (error) throw new Error(`generateScreen: variant insert failed: ${error.message}`);
+  if (!variantRows[0]) throw new Error(`generateScreen: variant insert failed`);
 
   return {
     screen,
-    variantId: (variant as { id: string }).id,
+    variantId: variantRows[0].id,
     storagePath,
     htmlPreview,
   };

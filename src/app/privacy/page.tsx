@@ -33,7 +33,7 @@ export default function PrivacyPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white/80">Contact</h2>
-              <p className="mt-3">For privacy inquiries, contact privacy@denovoai.co.</p>
+              <p className="mt-3">For privacy inquiries, contact privacy@agyemanenterprises.com.</p>
             </div>
           </div>
           <p className="mt-12 text-xs text-white/25"><Link href="/" className="hover:text-white/40">Back to home</Link></p>

@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, CheckCheck, LayoutGrid, List } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { ScreenCard } from "@/components/design/ScreenCard";
@@ -37,7 +36,6 @@ export default function DesignPage() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
-  const supabase = createClient();
 
   const [phase, setPhase] = useState<UIPhase>("loading");
   const [appName, setAppName] = useState("Your App");
@@ -52,23 +50,14 @@ export default function DesignPage() {
   const [approving, setApproving] = useState(false);
   const [generatingScreens, setGeneratingScreens] = useState<Set<string>>(new Set());
 
-  // Auth check
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push("/auth/login");
-    });
-  }, [supabase.auth, router]);
+  // Auth is enforced by middleware (proxy.ts) — no client-side check needed.
 
   // Load session + existing screens
   const loadSession = useCallback(async () => {
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("slot_map")
-      .eq("id", sessionId)
-      .single();
-
-    if (session?.slot_map) {
-      const sm = session.slot_map as Record<string, unknown>;
+    const sessRes = await fetch(`/api/sessions/${sessionId}`);
+    if (sessRes.ok) {
+      const session = await sessRes.json();
+      const sm = (session.slot_map as Record<string, unknown>) ?? {};
       setAppName(String(sm["APP_NAME"] ?? "Your App"));
     }
 
@@ -83,7 +72,7 @@ export default function DesignPage() {
       // No screens yet — fetch inventory suggestions
       await fetchInventory();
     }
-  }, [sessionId, supabase]);
+  }, [sessionId]);
 
   useEffect(() => { loadSession(); }, [loadSession]);
 

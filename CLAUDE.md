@@ -562,20 +562,24 @@ The user will add tunnel routes themselves unless they explicitly instruct other
 
 ---
 
-## ⛔ Dual Deployment — MANDATORY FOR EVERY APP (Vercel + Coolify/Hetzner)
+## ⛔ Deployment — SOLO DEPLOY TO AURORA/COOLIFY (policy changed 2026-06-03)
 
-Every app in the Agyemanosphere MUST be deployed to BOTH platforms. This is not optional.
+**No more dual deploy. New apps deploy ONCE, to Aurora via Coolify.** Vercel is no longer a required second target — the cost and env-drift of maintaining two live copies of every app is not worth it.
 
-- **Vercel** — primary production (GitHub push → auto-deploy), public domain (`appname.com`)
-- **Coolify/Hetzner** — failover (`appname.agyemanenterprises.com`), Cloudflare Tunnel → direct 40xx port
+- **Aurora / Coolify** — the single production target. `appname.agyemanenterprises.com`, Cloudflare Tunnel → direct host port (Tier 1, 40xx) for user-facing apps; Traefik/443 for backends (Tier 2).
+- One deploy, one set of env vars (sourced from Sanctum), one place to reason about.
+- Vercel may still be used for a pure-marketing/static front when it genuinely helps, but it is **not** mandatory and the app's real home is Aurora.
 
-A user hitting either URL gets the same working app. Both must be live simultaneously.
+**Historical note:** earlier doctrine mandated dual Vercel+Coolify deploys. That is retired. Apps already dual-deployed can stay as-is; do not add Vercel to new apps.
 
-**ENV VARS must be set identically in both places.** This includes Supabase, Resend, Stripe, and all app-specific keys. Setting env vars only in Vercel and not Coolify = broken failover = violation.
+## ⛔ Data backend — OFF SUPABASE, ON AURORA (policy changed 2026-06-03)
 
-Exceptions:
-- Python workers, background agents, queue processors → Coolify only (no Vercel counterpart needed)
-- Stateful long-running backends → Railway
+**All apps have migrated off Supabase Cloud to Aurora — EXCEPT medical and education apps.**
+
+- **Default for new + migrated apps:** solo Postgres on Aurora (one app = one database, Tier 3 port 543x), accessed directly via `postgres.js`. No Supabase client, no PostgREST, no RLS — **ownership is enforced in app code** (every query carries an explicit `WHERE user_id = <oidc sub>`).
+- **Auth:** ae-platform (ae-auth) OIDC at `platform.agyemanenterprises.com` — NOT Supabase Auth. Apps redirect to its `/auth/authorize`, exchange the code at `/auth/token`, validate JWTs against `/auth/jwks`. (See `project_ae_platform_deploy` memory.)
+- **EXCEPTION — medical + education apps stay on Supabase Cloud** for now (HIPAA/compliance posture, RLS, and managed auth are worth the cost there). Do not migrate those off Supabase without explicit instruction.
+- This app (AE Design Studio) is neither medical nor education → solo Aurora Postgres + ae-auth.
 
 ---
 

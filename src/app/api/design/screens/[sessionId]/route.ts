@@ -1,23 +1,32 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { sql } from '@/lib/db';
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from '@/lib/session';
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ) {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
+  }
 
   const { sessionId } = await params;
 
-  const { data: screens, error } = await supabase
-    .schema('design')
-    .from('screens')
-    .select('*, variants(*)')
-    .eq('session_id', sessionId)
-    .order('position', { ascending: true });
+  // Screens for this session, with their variants nested — scoped to the
+  // session's owner (join through public.sessions; there is no RLS now).
+  const screens = await sql`
+    SELECT s.*,
+           COALESCE(json_agg(v.* ORDER BY v.created_at DESC) FILTER (WHERE v.id IS NOT NULL), '[]') AS variants
+    FROM design.screens s
+    JOIN public.sessions ss ON ss.id = s.session_id
+    LEFT JOIN design.variants v ON v.screen_id = s.id
+    WHERE s.session_id = ${sessionId} AND ss.user_id = ${userId}
+    GROUP BY s.id
+    ORDER BY s.position`;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ screens: screens ?? [] });
+  return NextResponse.json({ screens });
 }

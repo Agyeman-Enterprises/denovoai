@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from '@/lib/session';
 import { Client as MinioClient } from 'minio';
 
 function getMinioClient() {
@@ -13,9 +13,12 @@ function getMinioClient() {
 }
 
 export async function GET(request: Request) {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
+  }
 
   const { searchParams } = new URL(request.url);
   const path = searchParams.get('path');

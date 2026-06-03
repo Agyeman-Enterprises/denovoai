@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { assembleJobs } from "@/lib/db";
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from "@/lib/session";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ jobId: string }> }
+  { params }: { params: Promise<{ jobId: string }> },
 ) {
   const { jobId } = await params;
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
   }
 
-  const { data: job } = await supabase
-    .from("assemble_jobs")
-    .select("stage, progress, log, result, error")
-    .eq("id", jobId)
-    .single();
-
+  // Ownership flows through the parent app (join in the repo).
+  const job = await assembleJobs.getForUser(jobId, userId);
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }

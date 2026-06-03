@@ -41,7 +41,10 @@ export async function updateSession(request: NextRequest) {
   const isPublic =
     pathname.startsWith("/auth") ||
     pathname.startsWith("/api/auth") ||
-    pathname === "/";
+    pathname === "/" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml";
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
@@ -55,3 +58,13 @@ export async function updateSession(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
+
+// Required by Next.js — the exported function must be named `middleware`
+export { proxy as middleware };
+
+// Exclude _next/static, _next/image, favicon, and public assets from auth checks
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|eot)$).*)",
+  ],
+};
