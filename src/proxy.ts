@@ -25,6 +25,7 @@ function isPublic(pathname: string): boolean {
   return (
     pathname.startsWith("/auth") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/internal") || // machine-to-machine; HMAC-authenticated in-route
     pathname === "/" ||
     pathname === "/pricing" ||
     pathname === "/manifest.webmanifest" ||

@@ -184,6 +184,10 @@ export const assembleJobs = {
     const rows = await sql<AssembleJob[]>`INSERT INTO assemble_jobs (app_id) VALUES (${appId}) RETURNING *`;
     return rows[0];
   },
+  /** Record the ae-queue job id once the assembly has been enqueued. */
+  async setQueueJobId(id: string, queueJobId: string): Promise<void> {
+    await sql`UPDATE assemble_jobs SET queue_job_id = ${queueJobId}, updated_at = now() WHERE id = ${id}`;
+  },
   async _serviceUpdate(id: string, patch: Partial<AssembleJob>): Promise<void> {
     await sql`UPDATE assemble_jobs SET ${sql(patch as Record<string, unknown>)}, updated_at = now() WHERE id = ${id}`;
   },

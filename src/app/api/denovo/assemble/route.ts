@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { sessions, subscriptions, apps, assembleJobs } from "@/lib/db";
 import { requireUserId, UnauthorizedError, unauthorizedResponse } from "@/lib/session";
 import { runAssembly } from "@/lib/assembler";
+import { enqueueAssembly } from "@/lib/queue";
+import type { SlotMap } from "@/types/denovo";
 
 export async function POST(request: Request) {
   let userId: string;
@@ -41,14 +43,23 @@ export async function POST(request: Request) {
   await apps._serviceUpdateStatus(appId, { status: "assembling", output_type: outputType });
 
   const job = await assembleJobs.create(appId);
+  const slotMap = session.slot_map as unknown as SlotMap;
 
-  // Fire and forget — Phase 4 moves this to ae-queue (durable tier).
-  runAssembly(
-    job.id,
-    appId,
-    session.slot_map as unknown as Parameters<typeof runAssembly>[2],
-    outputType,
-  ).catch(console.error);
+  // Durable offload to ae-queue; the worker calls back /api/internal/assemble/run.
+  // Falls back to inline execution when ae-queue isn't configured (local dev) or
+  // the enqueue fails, so assembly still happens.
+  let queueJobId: string | null = null;
+  try {
+    queueJobId = await enqueueAssembly({ jobId: job.id, appId, slotMap, outputType });
+  } catch (e) {
+    console.error("ae-queue enqueue failed; running assembly inline", e);
+  }
+
+  if (queueJobId) {
+    await assembleJobs.setQueueJobId(job.id, queueJobId);
+  } else {
+    runAssembly(job.id, appId, slotMap, outputType).catch(console.error);
+  }
 
   return NextResponse.json({
     jobId: job.id,

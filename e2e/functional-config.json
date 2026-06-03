@@ -53,7 +53,7 @@
     "completionMarker": "E2E Test Studio"
   },
   "authPaths": {
-    "login": "/auth/login",
+    "login": "/login",
     "protected": "/studio"
   },
   "emptyStateText": "No agency bloat. Just a tight loop from concept to code.",
