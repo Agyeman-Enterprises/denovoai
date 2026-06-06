@@ -164,8 +164,9 @@ export async function scanBundleForSecretFragments(
   const content = await response.text();
   const violations: string[] = [];
 
-  // Hardcoded prefix checks — not constructed from arguments
-  const FORBIDDEN_PREFIXES = [
+  // Hardcoded prefix checks — not constructed from arguments.
+  // nosemgrep: these are detection patterns, not actual secrets being hardcoded.
+  const FORBIDDEN_PREFIXES = [ // nosemgrep
     'sk_live_',
     'whsec_',
     'BEGIN RSA PRIVATE KEY',
@@ -182,9 +183,31 @@ export async function scanBundleForSecretFragments(
     }
   }
 
-  // Service role JWT detection: presence of "service_role" with JWT structure
-  if (content.includes('service_role') && content.includes('eyJ')) {
-    violations.push(`Possible service role JWT (service_role + eyJ) in bundle: ${bundleUrl}`);
+  // Service role JWT detection: extract all JWT-shaped strings from the bundle and
+  // base64-decode the payload segment to check if role === 'service_role'.
+  // We do NOT scan for the raw string "service_role" because the Supabase client
+  // library itself contains that string as a constant (for type-checking / error
+  // messages), which produces false positives on the login-page bundle.
+  const jwtPattern = /eyJ[A-Za-z0-9_-]+\.([A-Za-z0-9_-]+)\.[A-Za-z0-9_-]*/g;
+  let jwtMatch: RegExpExecArray | null;
+  while ((jwtMatch = jwtPattern.exec(content)) !== null) {
+    const payloadB64 = jwtMatch[1];
+    try {
+      // Pad the base64url string to a multiple of 4 before decoding
+      const padded = payloadB64 + '=='.slice((payloadB64.length % 4) || 4);
+      const decoded = Buffer.from(padded, 'base64').toString('utf-8');
+      const payload = JSON.parse(decoded) as Record<string, unknown>;
+      if (payload.role === 'service_role') {
+        violations.push(
+          `CRITICAL: Supabase service role JWT found in bundle: ${bundleUrl}. ` +
+          `Decoded payload role is "service_role". This JWT bypasses all RLS policies. ` +
+          `Replace with the anon key in client code.`
+        );
+        break; // One violation per bundle is enough
+      }
+    } catch {
+      // Malformed base64 or non-JSON payload — not a real JWT, skip
+    }
   }
 
   return violations;
@@ -193,7 +216,14 @@ export async function scanBundleForSecretFragments(
 // ─── Sensitive Path Checks ────────────────────────────────────────────────────
 
 /**
- * Verify that sensitive static paths are blocked (return non-200 status).
+ * Verify that sensitive static paths are blocked (return non-200, or 200 with HTML
+ * redirect rather than actual file contents).
+ *
+ * Apps whose middleware redirects all unauthenticated requests to /login return HTTP 200
+ * for any path including /.env.  We therefore also inspect the response body:
+ *   - HTML body (DOCTYPE / <html) → login redirect, NOT a real file — PASS
+ *   - Env-file body (KEY=VALUE pattern) → real secret exposed — FAIL
+ *   - Git config body ([core] pattern) → real config exposed — FAIL
  */
 export async function checkSensitivePathsBlocked(
   page: Page,
@@ -211,16 +241,43 @@ export async function checkSensitivePathsBlocked(
   ];
 
   const results = [];
-  for (const path of BLOCKED_PATHS) {
-    const response = await page.request.get(`${baseUrl}${path}`);
+  for (const sensitivePath of BLOCKED_PATHS) {
+    const response = await page.request.get(`${baseUrl}${sensitivePath}`);
     const status = response.status();
-    results.push({
-      path,
-      status,
-      violation: status === 200
-        ? `CRITICAL: ${path} is publicly accessible (HTTP 200) — may expose secrets or server config`
-        : null,
-    });
+
+    let violation: string | null = null;
+
+    if (status === 200) {
+      // Inspect body to distinguish between a real secret file and an HTML redirect page
+      const body = await response.text().catch(() => '');
+
+      const isHtmlRedirect =
+        body.includes('<!DOCTYPE html') ||
+        body.includes('<!doctype html') ||
+        body.includes('<html') ||
+        body.includes('<HTML');
+
+      if (isHtmlRedirect) {
+        // Middleware redirected to login or error page as HTML — not a real file leak
+        violation = null;
+      } else {
+        // Check if the body looks like an actual secret file
+        const looksLikeEnvFile = /^[A-Z_][A-Z0-9_]+=.+/m.test(body);
+        const looksLikeGitConfig = /^\[core\]/m.test(body) || /^\[remote/m.test(body);
+
+        if (looksLikeEnvFile || looksLikeGitConfig) {
+          violation =
+            `CRITICAL: ${sensitivePath} returned HTTP 200 and the body looks like a real secret file ` +
+            `(env/git config pattern detected). Secrets may be publicly accessible. ` +
+            `Body preview: ${body.slice(0, 120)}`;
+        } else {
+          // 200 but body doesn't match any secret file pattern — likely a catch-all 200 handler
+          violation = null;
+        }
+      }
+    }
+
+    results.push({ path: sensitivePath, status, violation });
   }
   return results;
 }

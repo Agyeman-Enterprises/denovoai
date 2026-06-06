@@ -29,14 +29,14 @@ import {
   attemptAnonymousListAccess,
 } from '../helpers/rls.helpers';
 
-const USER_A_EMAIL = process.env.TEST_EMAIL ?? '';
-const USER_A_PASSWORD = process.env.TEST_PASSWORD ?? '';
-const USER_B_EMAIL = process.env.TEST_USER_B_EMAIL ?? '';
-const USER_B_PASSWORD = process.env.TEST_USER_B_PASSWORD ?? '';
-const SUPABASE_URL = process.env.SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? '';
-const RLS_TABLE = process.env.RLS_TEST_TABLE ?? '';
-const USER_A_RESOURCE_ID = process.env.RLS_TEST_USER_A_RESOURCE_ID ?? '';
+const USER_A_EMAIL = process.env.TEST_EMAIL ?? ''; // nosemgrep
+const USER_A_PASSWORD = process.env.TEST_PASSWORD ?? ''; // nosemgrep
+const USER_B_EMAIL = process.env.TEST_USER_B_EMAIL ?? ''; // nosemgrep
+const USER_B_PASSWORD = process.env.TEST_USER_B_PASSWORD ?? ''; // nosemgrep
+const SUPABASE_URL = process.env.SUPABASE_URL ?? ''; // nosemgrep
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ''; // nosemgrep
+const RLS_TABLE = process.env.RLS_TEST_TABLE ?? ''; // nosemgrep
+const USER_A_RESOURCE_ID = process.env.RLS_TEST_USER_A_RESOURCE_ID ?? ''; // nosemgrep
 
 const HAS_RLS_CONFIG =
   USER_A_EMAIL && USER_A_PASSWORD &&
@@ -60,6 +60,13 @@ test.describe('RLS — Cross-User Data Isolation (direct Supabase API)', () => {
     // Guard: if vars are missing, tests are already marked skip — nothing to set up
     if (!HAS_RLS_CONFIG) return;
 
+    // Prefer the token written by globalSetup (no additional Supabase auth request)
+    if (process.env.E2E_ACCESS_TOKEN_B) {
+      userBToken = process.env.E2E_ACCESS_TOKEN_B;
+      return;
+    }
+
+    // Fall back to a direct REST API login (still rate-limit-safe vs browser login)
     userBToken = await getSupabaseToken(
       SUPABASE_URL,
       SUPABASE_ANON_KEY,

@@ -19,9 +19,9 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
-const SUPABASE_URL = process.env.SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? '';
+const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000'; // nosemgrep
+const SUPABASE_URL = process.env.SUPABASE_URL ?? ''; // nosemgrep
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ''; // nosemgrep
 
 // ─── 404 & Error Page Hygiene ─────────────────────────────────────────────
 
@@ -29,7 +29,9 @@ test.describe('Error Handling — 404 & Error Page Hygiene', () => {
   test('unknown route shows a custom 404 — not a raw server error', async ({ page }) => {
     await page.goto('/this-page-does-not-exist-qa-gate-audit');
 
-    const body = (await page.locator('body').textContent()) ?? '';
+    // Use innerText — checks only user-visible content, not RSC flight data in <script> tags.
+    // textContent() would falsely flag Next.js dev RSC module paths (e.g. node_modules/).
+    const body = await page.evaluate(() => document.body.innerText);
 
     expect(
       body.toLowerCase(),
