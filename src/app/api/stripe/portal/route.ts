@@ -1,21 +1,18 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { subscriptions } from "@/lib/db";
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from "@/lib/session";
 
 export async function POST() {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
   }
 
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("stripe_customer_id")
-    .eq("user_id", user.id)
-    .single();
-
+  const sub = await subscriptions.getByUser(userId);
   if (!sub?.stripe_customer_id) {
     return NextResponse.json({ error: "No billing account" }, { status: 400 });
   }

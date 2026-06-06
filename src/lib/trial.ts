@@ -1,4 +1,4 @@
-import { createServiceClient } from '@/lib/supabase/server'
+import { sql } from '@/lib/db'
 
 /** Get trial info for a user. Returns null if no subscription exists. */
 export async function getTrialInfo(userId: string): Promise<{
@@ -6,19 +6,14 @@ export async function getTrialInfo(userId: string): Promise<{
   trialEnd: Date | null
   daysRemaining: number
 } | null> {
-  const admin = createServiceClient()
-  const { data } = await admin
-    .from('billing_subscriptions')
-    .select('status, trial_end')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
+  const rows = await sql<{ status: string; trial_end: string | null }[]>`
+    SELECT status, trial_end FROM billing_subscriptions
+    WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 1`
+  const data = rows[0]
   if (!data) return null
 
   const isTrialing = data.status === 'trialing'
-  const trialEnd   = data.trial_end ? new Date(data.trial_end) : null
+  const trialEnd = data.trial_end ? new Date(data.trial_end) : null
   const daysRemaining = trialEnd
     ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / 86_400_000))
     : 0
@@ -28,13 +23,8 @@ export async function getTrialInfo(userId: string): Promise<{
 
 /** Check if a user has ever had a trial (to prevent double-trial abuse). */
 export async function hasUsedTrial(userId: string): Promise<boolean> {
-  const admin = createServiceClient()
-  const { data } = await admin
-    .from('billing_subscriptions')
-    .select('trial_start')
-    .eq('user_id', userId)
-    .not('trial_start', 'is', null)
-    .limit(1)
-    .maybeSingle()
-  return !!data
+  const rows = await sql`
+    SELECT 1 FROM billing_subscriptions
+    WHERE user_id = ${userId} AND trial_start IS NOT NULL LIMIT 1`
+  return rows.length > 0
 }

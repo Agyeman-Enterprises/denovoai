@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { userRoles } from '@/lib/db'
+import { getSessionUser } from '@/lib/session'
 
 export type AppRole = 'owner' | 'admin' | 'member' | 'viewer'
 
@@ -10,29 +11,15 @@ const ROLE_HIERARCHY: Record<AppRole, number> = {
   viewer: 1,
 }
 
-/** Returns the authenticated user's highest role for the given org (or global). */
+/** Returns the user's highest role for the given org (or global if orgId omitted). */
 export async function getUserRole(userId: string, orgId?: string): Promise<AppRole | null> {
-  const supabase = await createClient()
-  let query = supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-
-  if (orgId) {
-    query = query.eq('org_id', orgId)
-  } else {
-    query = query.is('org_id', null)
-  }
-
-  const { data } = await query
-
-  if (!data?.length) return null
-
-  // Return the highest-ranked role
-  return data.reduce<AppRole>((best, row) => {
-    const r = row.role as AppRole
-    return ROLE_HIERARCHY[r] > ROLE_HIERARCHY[best] ? r : best
-  }, 'viewer')
+  const rows = await userRoles.forUser(userId)
+  const scoped = rows.filter((r) => (orgId ? r.org_id === orgId : r.org_id === null))
+  if (!scoped.length) return null
+  return scoped.reduce<AppRole>(
+    (best, row) => (ROLE_HIERARCHY[row.role] > ROLE_HIERARCHY[best] ? row.role : best),
+    'viewer',
+  )
 }
 
 /** True if `role` meets or exceeds `minimum`. */
@@ -42,24 +29,18 @@ export function hasRole(role: AppRole | null, minimum: AppRole): boolean {
 }
 
 /**
- * Server-side role guard. Redirects if user lacks the required role.
+ * Server-side role guard. Redirects if the user lacks the required role.
  * Use in Server Component layouts or pages.
- *
- * @example — require admin in app/(admin)/layout.tsx:
- *   const { user, role } = await requireRole('admin')
  */
 export async function requireRole(
   minimum: AppRole,
-  options: { orgId?: string; redirectTo?: string } = {}
+  options: { orgId?: string; redirectTo?: string } = {},
 ): Promise<{ userId: string; role: AppRole }> {
   const { orgId, redirectTo = '/' } = options
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (error || !user) redirect('/auth/login')
+  const user = await getSessionUser()
+  if (!user) redirect('/auth/login')
 
   const role = await getUserRole(user.id, orgId)
-
   if (!hasRole(role, minimum)) redirect(redirectTo)
 
   return { userId: user.id, role: role! }

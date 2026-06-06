@@ -2,70 +2,71 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { SlotMap } from "@/types/denovo";
 
+interface DesignScreen {
+  id: string;
+  name: string;
+  screen_type: string;
+  variants: Array<{ html_preview?: string; is_active: boolean }>;
+}
+
 export default function ConfirmPage() {
   const router = useRouter();
   const params = useParams();
   const sessionId = params.sessionId as string;
-  const supabase = createClient();
   const [slots, setSlots] = useState<Partial<SlotMap> | null>(null);
+  const [screens, setScreens] = useState<DesignScreen[]>([]);
   const [loading, setLoading] = useState(true);
   const [assembling, setAssembling] = useState(false);
 
   useEffect(() => {
     async function loadSession() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/auth/login"); return; }
-
-      const { data: session } = await supabase
-        .from("sessions")
-        .select("slot_map")
-        .eq("id", sessionId)
-        .single();
-
-      if (session?.slot_map) {
-        setSlots(session.slot_map as Partial<SlotMap>);
+      // Auth enforced by middleware; this just loads data.
+      const sessRes = await fetch(`/api/sessions/${sessionId}`);
+      if (sessRes.ok) {
+        const session = await sessRes.json();
+        if (session?.slot_map) setSlots(session.slot_map as Partial<SlotMap>);
       }
+
+      // Load design screens if available
+      const screensRes = await fetch(`/api/design/screens/${sessionId}`);
+      if (screensRes.ok) {
+        const screensData = await screensRes.json();
+        setScreens((screensData.screens ?? []).slice(0, 8));
+      }
+
       setLoading(false);
     }
     loadSession();
-  }, [sessionId, supabase, router]);
+  }, [sessionId]);
 
   const handleBuild = async (outputType: "deploy" | "download") => {
     setAssembling(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Create app record
+    // Create app record (server creates it for the authed user + links the session)
     const slug = (slots?.APP_NAME || "app").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const { data: app } = await supabase
-      .from("apps")
-      .insert({
-        user_id: user.id,
+    const createRes = await fetch("/api/apps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         name: slots?.APP_NAME || "Untitled App",
         slug,
         template: slots?.TEMPLATE || "saas",
         slot_map: slots || {},
         snippets: slots?.SNIPPETS || [],
         output_type: outputType,
-      })
-      .select()
-      .single();
+        sessionId,
+      }),
+    });
 
+    if (!createRes.ok) { setAssembling(false); return; }
+    const { app } = await createRes.json();
     if (!app) { setAssembling(false); return; }
-
-    // Link session to app
-    await supabase
-      .from("sessions")
-      .update({ app_id: app.id, stage: "assembling" })
-      .eq("id", sessionId);
 
     // Trigger assembly
     const res = await fetch("/api/denovo/assemble", {
@@ -109,7 +110,39 @@ export default function ConfirmPage() {
       <Navbar />
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-lg">
-          <h2 className="text-xl font-bold">Here&apos;s what DeNovo will build</h2>
+          <h2 className="text-xl font-bold">Here&apos;s what AE Design Studio will build</h2>
+
+          {/* Screen thumbnails — visual link between design and code */}
+          {screens.length > 0 && (
+            <div className="mt-5">
+              <p className="mb-2 text-xs text-muted-foreground">Designed screens ({screens.length} shown)</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {screens.map(screen => {
+                  const preview = screen.variants.find(v => v.is_active)?.html_preview;
+                  return (
+                    <div key={screen.id} className="group relative overflow-hidden rounded-md border border-border bg-zinc-900" style={{ aspectRatio: "9/16" }}>
+                      {preview ? (
+                        <iframe
+                          srcDoc={preview}
+                          className="pointer-events-none h-full w-full"
+                          style={{ transform: "scale(0.2)", transformOrigin: "top left", width: "500%", height: "500%" }}
+                          sandbox="allow-same-origin"
+                          title={screen.name}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <span className="text-[8px] text-muted-foreground">{screen.name}</span>
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
+                        <p className="truncate text-[8px] text-zinc-300">{screen.name}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 space-y-3">
             <Row label="Name" value={slots.APP_NAME || "—"} />

@@ -1,50 +1,30 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { redirect } from "next/navigation";
+import { apps } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
 import { Navbar } from "@/components/navbar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DeleteAppButton } from "@/components/delete-app-button";
 import Link from "next/link";
-import type { Database } from "@/types/database";
 
-type AppRow = Database["public"]["Tables"]["apps"]["Row"];
+export default async function AppDetailPage({ params }: { params: Promise<{ appId: string }> }) {
+  const { appId } = await params;
 
-export default function AppDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const appId = params.appId as string;
-  const supabase = createClient();
-  const [app, setApp] = useState<AppRow | null>(null);
-  const [loading, setLoading] = useState(true);
+  const user = await getSessionUser();
+  if (!user) redirect("/auth/login");
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/auth/login"); return; }
-
-      const { data } = await supabase
-        .from("apps")
-        .select("*")
-        .eq("id", appId)
-        .single();
-
-      setApp(data);
-      setLoading(false);
-    }
-    load();
-  }, [appId, supabase, router]);
-
-  const handleDelete = async () => {
-    if (!confirm("Delete this app? This cannot be undone.")) return;
-    await fetch(`/api/apps/${appId}`, { method: "DELETE" });
-    router.push("/dashboard");
-  };
-
-  if (loading) return <><Navbar /><div className="flex flex-1 items-center justify-center"><p className="text-muted-foreground">Loading...</p></div></>;
-  if (!app) return <><Navbar /><div className="flex flex-1 items-center justify-center"><p className="text-muted-foreground">App not found.</p></div></>;
+  const app = await apps.getForUser(appId, user.id);
+  if (!app) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-muted-foreground">App not found.</p>
+        </div>
+      </>
+    );
+  }
 
   const slots = app.slot_map as Record<string, unknown>;
 
@@ -117,7 +97,7 @@ export default function AppDetailPage() {
           )}
 
           <div className="mt-8">
-            <Button variant="destructive" size="sm" onClick={handleDelete}>Delete App</Button>
+            <DeleteAppButton appId={app.id} />
           </div>
         </div>
       </main>

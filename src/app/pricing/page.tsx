@@ -109,7 +109,7 @@ export default function PricingPage() {
       body: JSON.stringify({ planId, annual }),
     });
     const data = await res.json();
-    if (data.url) window.location.href = data.url;
+    if (data.url) window.location.assign(data.url);
   };
 
   return (

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { callLiteLLM } from "@/lib/litellm";
+import { sessions } from "@/lib/db";
+import { requireUserId, UnauthorizedError, unauthorizedResponse } from "@/lib/session";
 import type { ChatMessage } from "@/types/denovo";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import type { SessionStage } from "@/types/db";
 
 const SYSTEM_PROMPT = `You are DeNovo's Intent Parser. Your job is to understand what app a user wants to build and extract the information needed to generate it from a template.
 
@@ -65,11 +65,12 @@ When stage is "confirming", your message should be a clean summary like:
   Looks right? Or want to change anything?"`;
 
 export async function POST(request: Request) {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch (e) {
+    if (e instanceof UnauthorizedError) return unauthorizedResponse();
+    throw e;
   }
 
   const { sessionId, message } = await request.json();
@@ -78,24 +79,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing sessionId or message" }, { status: 400 });
   }
 
-  // Get or create session
-  let { data: session } = await supabase
-    .from("sessions")
-    .select("*")
-    .eq("id", sessionId)
-    .single();
-
+  // Get or create session (scoped to this user)
+  let session = await sessions.getForUser(sessionId, userId);
   if (!session) {
-    const { data: newSession, error } = await supabase
-      .from("sessions")
-      .insert({ id: sessionId, user_id: user.id, messages: [], slot_map: {} })
-      .select()
-      .single();
-
-    if (error || !newSession) {
-      return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
-    }
-    session = newSession;
+    session = await sessions.create(userId, sessionId);
   }
 
   // Build conversation history
@@ -104,20 +91,18 @@ export async function POST(request: Request) {
 
   const currentSlots = (session.slot_map as Record<string, unknown>) || {};
 
-  // Call Claude
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+  // Call LiteLLM — Tier 5 (sonnet) for agentic slot extraction
+  const assistantText = await callLiteLLM({
+    model: "claude-sonnet-4-6",
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
     messages: [
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: `Current conversation:\n${messages.map((m: ChatMessage) => `${m.role}: ${m.content}`).join("\n")}\n\nCurrent slots: ${JSON.stringify(currentSlots)}\n\nRespond in JSON only.`,
       },
     ],
   });
-
-  const assistantText = response.content[0].type === "text" ? response.content[0].text : "";
 
   let parsed: { message: string; slots?: Record<string, unknown>; stage: string };
   try {
@@ -133,18 +118,14 @@ export async function POST(request: Request) {
   messages.push({ role: "assistant", content: parsed.message, timestamp: new Date().toISOString() });
 
   // Determine session stage
-  const sessionStage = parsed.stage === "ready" ? "assembling" : parsed.stage === "confirming" ? "confirming" : "clarifying";
+  const sessionStage: SessionStage = parsed.stage === "ready" ? "assembling" : parsed.stage === "confirming" ? "confirming" : "clarifying";
 
-  // Update session
-  await supabase
-    .from("sessions")
-    .update({
-      messages,
-      slot_map: mergedSlots,
-      stage: sessionStage,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", sessionId);
+  // Update session (scoped to this user)
+  await sessions.updateForUser(sessionId, userId, {
+    messages,
+    slot_map: mergedSlots,
+    stage: sessionStage,
+  });
 
   return NextResponse.json({
     message: parsed.message,

@@ -1,4 +1,6 @@
-import archiver from "archiver";
+import type { ArchiverOptions, Archiver } from "archiver";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const archiver = require("archiver") as (format: string, options?: ArchiverOptions) => Archiver;
 import fs from "fs";
 import { Client as MinioClient } from "minio";
 import type { SlotMap } from "@/types/denovo";

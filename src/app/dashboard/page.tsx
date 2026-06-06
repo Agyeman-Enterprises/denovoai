@@ -1,99 +1,87 @@
-"use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Navbar } from "@/components/navbar";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import type { Database } from "@/types/database";
+import { redirect } from "next/navigation";
+import { apps } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
+import { DashboardShell } from "@/components/dashboard-shell";
+import type { AppStatus } from "@/types/db";
 
-type AppRow = Database["public"]["Tables"]["apps"]["Row"];
+const orange = "#F5530A";
+const cardBg = "#0F0F18";
+const border = "rgba(255,255,255,0.07)";
+const muted = "rgba(255,255,255,0.4)";
 
-const STATUS_BADGE: Record<string, { variant: "default" | "success" | "warning" | "destructive" | "secondary"; label: string }> = {
-  parsing: { variant: "default", label: "Parsing" },
-  confirming: { variant: "default", label: "Confirming" },
-  assembling: { variant: "warning", label: "Assembling" },
-  deploying: { variant: "warning", label: "Deploying" },
-  live: { variant: "success", label: "Live" },
-  downloaded: { variant: "secondary", label: "Downloaded" },
-  failed: { variant: "destructive", label: "Failed" },
+const STATUS_STYLE: Record<AppStatus, { bg: string; color: string; label: string }> = {
+  parsing:    { bg: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", label: "Draft" },
+  confirming: { bg: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", label: "Draft" },
+  assembling: { bg: "rgba(245,83,10,0.12)",   color: orange,                  label: "Building" },
+  deploying:  { bg: "rgba(245,83,10,0.12)",   color: orange,                  label: "Deploying" },
+  live:       { bg: "rgba(52,211,153,0.12)",  color: "#34d399",               label: "Live" },
+  downloaded: { bg: "rgba(139,92,246,0.12)",  color: "#a78bfa",               label: "Delivered" },
+  failed:     { bg: "rgba(248,113,113,0.12)", color: "#f87171",               label: "Failed" },
 };
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const supabase = createClient();
-  const [apps, setApps] = useState<AppRow[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function DashboardPage() {
+  const user = await getSessionUser();
+  if (!user) redirect("/auth/login");
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/auth/login"); return; }
-
-      const { data } = await supabase
-        .from("apps")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      setApps(data || []);
-      setLoading(false);
-    }
-    load();
-  }, [supabase, router]);
+  const list = await apps.listByUser(user.id);
 
   return (
-    <>
-      <Navbar />
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">My Apps</h1>
-            <Link href="/studio" data-testid="nav-studio">
-              <Button>New App</Button>
+    <DashboardShell>
+      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(32px,5vw,52px) clamp(20px,4vw,48px)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+          <div>
+            <h1 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: 0 }}>My Apps</h1>
+            <p style={{ fontSize: 13, color: muted, margin: "4px 0 0" }}>Manage all your projects in one place</p>
+          </div>
+          <Link href="/studio" data-testid="nav-studio" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: orange, color: "#fff", padding: "10px 20px", borderRadius: 9, fontSize: 14, fontWeight: 700, textDecoration: "none", boxShadow: `0 0 20px rgba(245,83,10,0.2)` }}>
+            <span style={{ fontSize: 16 }}>+</span> New Project
+          </Link>
+        </div>
+
+        {list.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "clamp(60px,10vw,100px) 20px" }}>
+            <div style={{ width: 64, height: 64, borderRadius: 16, background: "rgba(245,83,10,0.08)", border: `1px solid rgba(245,83,10,0.15)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 6v16M6 14h16" stroke={orange} strokeWidth="2" strokeLinecap="round"/></svg>
+            </div>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: 700, margin: "0 0 8px" }}>No projects yet</h2>
+            <p style={{ fontSize: 14, color: muted, margin: "0 0 28px", maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
+              Describe your idea and we&apos;ll design and build it for you.
+            </p>
+            <Link href="/studio" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: orange, color: "#fff", padding: "12px 28px", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }} data-testid="nav-studio">
+              Build your first project
             </Link>
           </div>
-
-          {loading ? (
-            <p className="mt-8 text-muted-foreground">Loading...</p>
-          ) : apps.length === 0 ? (
-            <Card className="mt-8 text-center py-12">
-              <p className="text-muted-foreground">No apps yet.</p>
-              <Link href="/studio" data-testid="nav-studio">
-                <Button className="mt-4">Build Your First App</Button>
-              </Link>
-            </Card>
-          ) : (
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {apps.map((app) => {
-                const status = STATUS_BADGE[app.status] || STATUS_BADGE.parsing;
-                return (
-                  <Link key={app.id} href={`/dashboard/app/${app.id}`}>
-                    <Card className="transition-colors hover:border-primary/50 cursor-pointer">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{app.name}</h3>
-                        <Badge variant={status.variant}>{status.label}</Badge>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="secondary">{app.template}</Badge>
-                      </div>
-                      <p className="mt-3 text-xs text-muted-foreground">
-                        Created {new Date(app.created_at).toLocaleDateString()}
-                      </p>
-                      {app.status === "failed" && app.error_message && (
-                        <p className="mt-2 text-xs text-red-400 truncate">{app.error_message}</p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+            {list.map((app) => {
+              const s = STATUS_STYLE[app.status] || STATUS_STYLE.parsing;
+              return (
+                <Link key={app.id} href={`/dashboard/app/${app.id}`} style={{ textDecoration: "none" }}>
+                  <div className="card-glow" style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 14, padding: "20px 22px", cursor: "pointer" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                      <h3 style={{ fontSize: 15, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1.3 }}>{app.name || "Untitled Project"}</h3>
+                      <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: s.bg, color: s.color, flexShrink: 0, marginLeft: 8 }}>{s.label}</span>
+                    </div>
+                    <p style={{ fontSize: 12, color: "rgba(245,83,10,0.7)", fontWeight: 600, margin: "0 0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{app.template || "App"}</p>
+                    {app.status === "failed" && app.error_message && (
+                      <p style={{ fontSize: 12, color: "#f87171", margin: "0 0 10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{app.error_message}</p>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${border}` }}>
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", margin: 0 }}>{new Date(app.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                      {app.status === "live" && (
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke={orange} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       )}
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </main>
-    </>
+    </DashboardShell>
   );
 }

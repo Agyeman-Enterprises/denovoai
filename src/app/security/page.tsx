@@ -29,7 +29,7 @@ export default function SecurityPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white/80">Reporting Vulnerabilities</h2>
-              <p className="mt-3">To report a security vulnerability, contact security@denovoai.co.</p>
+              <p className="mt-3">To report a security vulnerability, contact security@agyemanenterprises.com.</p>
             </div>
           </div>
           <p className="mt-12 text-xs text-white/25"><Link href="/" className="hover:text-white/40">Back to home</Link></p>
